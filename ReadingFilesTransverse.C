@@ -7,41 +7,54 @@ vector<TString> types_line = {" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", 
 
 vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens);
 
-vector<Double_t> GetSlugVals(Int_t slugnum, vector<Double_t> runs, vector<Double_t> slugs, vector<Double_t> arms, vector<Double_t> means, vector<Double_t> errors);
+vector<Double_t> GetSlugVals(Int_t slugnum, vector<Int_t> runs, vector<Int_t> slugs, vector<TString> arms, vector<Double_t> means, vector<Double_t> errors);
 
-void ReadingFiles(){
+void ReadingFilesTransverse(){
   
   vector<vector<TString>> type_table;
 
   ifstream infile;
-  infile.open(Form("./pcrex_run_data.list", promptdir.Data()));
+  infile.open("./another_runlist/pcrex_run_data.list");
   
   string ins;
+  vector<Int_t> Runs;
+  vector<Int_t> Slugs;
+  vector<TString> Arms;
   vector<Double_t> Vals;
   vector<Double_t> RunMeans;
   vector<Double_t> RunErrors;
   vector<Double_t> Zeros;
 
   Int_t i = 0;
-  Int_t First = 5000;
-  Int_t Last = 5010;
-  while(infile >> ins){
+  Int_t First = 0;
+  Int_t Last = 8000;
+  while(1==1){
+    getline(infile, ins, '\n');
+    cout << endl << endl << ins << endl;
     stringstream line(ins);
     types_line.clear();
+    int linenum = 0;
     while(line.good()){
       string substr;
       getline(line, substr, ',');
+      cout << linenum << ":  " << types[linenum] << " = \"" << substr << "\"" << endl;
       types_line.push_back(substr);
+      linenum++;
     }
     
+    if(types_line[31]==" " || types_line[31]=="BEGONE_COMMAS" || types_line[40]==" " || types_line[40]=="BEGONE_COMMAS"){
+      continue;
+    }
+    
+    //cout << types_line[31].Data() << "    " << types_line[40].Data() << endl;
     TString arm = types_line[0];
     TString wien = types_line[11];
     TString ihwp = types_line[16];
     TString goodbad = types_line[24];
     TString production = types_line[29];
-    Int_t slug = stoi(types_line[31]);
+    Int_t slug = stoi(types_line[31].Data());
     TString target = types_line[35];
-    Int_t run = stoi(types_line[40]);
+    Int_t run = stoi(types_line[40].Data());
 
     if(run >= First && run <= Last && slug >= 4000 && slug <= 4500 && production == "\'Production\'" && goodbad == "\'Good\'"){
       Vals = OpenRun(run, ihwp, wien);
@@ -50,30 +63,36 @@ void ReadingFiles(){
       }
 
       type_table.push_back(types_line);
-
+      Runs.push_back(run);
+      Slugs.push_back(slug);
+      Arms.push_back(arm);
       RunMeans.push_back(Vals[0]);
       RunErrors.push_back(Vals[1]);
       Zeros.push_back(0);
 
       i++;
     }
+    
+    if(i == 100){
+      break;
+    }
   }
   
   infile.close();
   
-  Double_t RunsArr[type_table.size()];
-  Double_t RunMeansArr[type_table.size()];
-  Double_t ZerosArr[type_table.size()];
-  Double_t RunErrorsArr[type_table.size()];
+  Double_t RunsArr[Runs.size()];
+  Double_t RunMeansArr[Runs.size()];
+  Double_t ZerosArr[Runs.size()];
+  Double_t RunErrorsArr[Runs.size()];
   for(Int_t j=0; j<i; j++){
-    RunsArr[j] = stoi(type_table[j][40]);
+    RunsArr[j] = Runs[j];
     ZerosArr[j] = 0;
     RunMeansArr[j] = RunMeans[j];
     RunErrorsArr[j] = RunErrors[j];
   }
   
   TCanvas *c1 = new TCanvas();
-  TGraphErrors *plotallruns = new TGraphErrors(type_table.size(), RunsArr, RunMeansArr, ZerosArr, RunErrorsArr);
+  TGraphErrors *plotallruns = new TGraphErrors(Runs.size(), RunsArr, RunMeansArr, ZerosArr, RunErrorsArr);
   plotallruns->SetTitle("PREX Runs Upstream DD");
   plotallruns->SetMarkerStyle(7);
   plotallruns->Draw("AP");
@@ -138,10 +157,10 @@ vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens){
   
   Int_t ihwp = 1;
   Int_t wien = 1;
-  if(ihwps == "IN"){
+  if(ihwps == "'IN'"){
     ihwp = -1;
   }
-  if(wiens == "FLIP-RIGHT"){
+  if(wiens == "'FLIP-RIGHT'"){
     wien = -1;
   }
 
@@ -153,7 +172,7 @@ vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens){
   return vals;
 }
 
-vector<Double_t> GetSlugVals(Int_t slugnum, vector<Double_t> runs, vector<Double_t> slugs, vector<Double_t> arms, vector<Double_t> means, vector<Double_t> errors){
+vector<Double_t> GetSlugVals(Int_t slugnum, vector<Int_t> runs, vector<Int_t> slugs, vector<TString> arms, vector<Double_t> means, vector<Double_t> errors){
   vector<Double_t> slugmeanerr = {-1,-1};
 
   vector<Double_t> slugruns;
@@ -163,9 +182,9 @@ vector<Double_t> GetSlugVals(Int_t slugnum, vector<Double_t> runs, vector<Double
 
   for(Int_t i = 0; i < runs.size(); i++){
     if(slugs[i] == slugnum){
-      if(arms[i]!=0){
-        return slugmeanerr;
-      }
+      //if(arms[i]!="'0'"){
+      //  return slugmeanerr;
+      //}
       slugruns.push_back(runs[i]);
       slugmeans.push_back(means[i]);
       slugerrors.push_back(errors[i]);

@@ -20,7 +20,7 @@ void MakeBigList(){
         run_numbers.push_back(i);
         
         //makes the status wiggle. partly for fun, partly as a visual cue.
-        for(int j = 0; j<round(80*(sin((i-istart)*M_PI/20))+40); j++){
+        for(int j = 0; j<round(40*(sin((i-istart)*M_PI/20))+40); j++){
             cout << " ";
         }
         cout << "Finished run " << i << "..." << endl;
@@ -48,7 +48,7 @@ void MakeBigList(){
 vector<TString> GetRunInfo(int run){
     
     //list of rcnd types, empty outputs default to space.
-    vector<TString> types = {"arm_flag", "beam_current", "beam_energy", "bmw", "components", "component_stats", "event_count", "event_rate", "experiment", "feedback", "FFB", "flip_state", "good_charge", " helicity_frequency", "helicity_pattern", "horizontal_wien", "ihwp", "is_valid_run_end", "prompt_analysis", "respin_comment", "rhwp", "rtvs", "run_config", "run_end_time", "run_flag", "run_length", "run_prestart_time", "run_start_epoch", "run_start_time", "run_type", "session", "slug", "target_45encoder", "target_90encoder", "target_encoder", "target_type", "total_charge", "user_comment", "vertical_wien", "wac_comment"};
+    vector<TString> types = {"arm_flag = ", "beam_current = ", "beam_energy = ", "bmw = ", "components = ", "component_stats = ", "event_count = ", "event_rate = ", "experiment = ", "feedback = ", "FFB = ", "flip_state = ", "good_charge = ", " helicity_frequency = ", "helicity_pattern = ", "horizontal_wien = ", "ihwp = ", "is_valid_run_end = ", "prompt_analysis = ", "respin_comment = ", "rhwp = ", "rtvs = ", "run_config = ", "run_end_time = ", "run_flag = ", "run_length = ", "run_prestart_time = ", "run_start_epoch = ", "run_start_time = ", "run_type = ", "session = ", "slug = ", "target_45encoder = ", "target_90encoder = ", "target_encoder = ", "target_type = ", "total_charge = ", "user_comment = ", "vertical_wien = ", "wac_comment = "};
     vector<TString> type_outputs = {" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "};
     vector<TString> badrun = {"bad"};
 
