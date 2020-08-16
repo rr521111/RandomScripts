@@ -2,61 +2,54 @@ TString promptdir = "/u/group/halla/parity/software/japan_offline/prompt/prex-pr
 TString rrwork = "/w/hallc-scifs17exp/qweak/rradloff/crex-runlist/prex-runlist";
 
 TString pcrex = "PREX";
+vector<TString> types = {"arm_flag", "beam_current", "beam_energy", "bmw", "components", "component_stats", "event_count", "event_rate", "experiment", "feedback", "FFB", "flip_state", "good_charge", " helicity_frequency", "helicity_pattern", "horizontal_wien", "ihwp", "is_valid_run_end", "prompt_analysis", "respin_comment", "rhwp", "rtvs", "run_config", "run_end_time", "run_flag", "run_length", "run_prestart_time", "run_start_epoch", "run_start_time", "run_type", "session", "slug", "target_45encoder", "target_90encoder", "target_encoder", "target_type", "total_charge", "user_comment", "vertical_wien", "wac_comment", "run_number"};
+vector<TString> types_line = {" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "};
 
 vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens);
 
 vector<Double_t> GetSlugVals(Int_t slugnum, vector<Double_t> runs, vector<Double_t> slugs, vector<Double_t> arms, vector<Double_t> means, vector<Double_t> errors);
 
 void ReadingFiles(){
-
-  vector<Double_t> Runs;
-  vector<Double_t> RunMeans;
-  vector<Double_t> RunErrors;
-  vector<Double_t> Slugs;
-  vector<TString> ALL_PREXs;
-  vector<TString> goodbads;
-  vector<TString> IHWPs;
-  vector<TString> Wiens;
-  vector<Double_t> Arms;
-  vector<Double_t> Zeros;
+  
+  vector<vector<TString>> type_table;
 
   ifstream infile;
-  if(pcrex == "PREX"){
-    infile.open(Form("%s/prex-runlist/all_production.list", promptdir.Data()));
-  }else{
-    infile.open(Form("%s/all_production_crex.list", rrwork.Data()));
-  }
+  infile.open(Form("./pcrex_run_data.list", promptdir.Data()));
   
   string ins;
-  vector<vector<string>> result;
-  vector<string> subresult;
   vector<Double_t> Vals;
+  vector<Double_t> RunMeans;
+  vector<Double_t> RunErrors;
+  vector<Double_t> Zeros;
+
   Int_t i = 0;
-  Int_t First = 0;
-  Int_t Last = 5000;
+  Int_t First = 5000;
+  Int_t Last = 5010;
   while(infile >> ins){
     stringstream line(ins);
-    subresult.clear();
+    types_line.clear();
     while(line.good()){
       string substr;
       getline(line, substr, ',');
-      subresult.push_back(substr);
+      types_line.push_back(substr);
     }
     
-    if(stoi(subresult[0]) >= First && stoi(subresult[0]) <= Last){
-      Vals = OpenRun(stoi(subresult[0]), subresult[4], subresult[5]);
+    TString arm = types_line[0];
+    TString wien = types_line[11];
+    TString ihwp = types_line[16];
+    TString goodbad = types_line[24];
+    TString production = types_line[29];
+    Int_t slug = stoi(types_line[31]);
+    TString target = types_line[35];
+    Int_t run = stoi(types_line[40]);
+
+    if(run >= First && run <= Last && slug >= 4000 && slug <= 4500 && production == "\'Production\'" && goodbad == "\'Good\'"){
+      Vals = OpenRun(run, ihwp, wien);
       if(Vals[0] == -1){
         continue;
       }
 
-      result.push_back(subresult);
-      Runs.push_back(stoi(result[i][0]));
-      Slugs.push_back(stoi(result[i][1]));
-      ALL_PREXs.push_back(result[i][2]);
-      goodbads.push_back(result[i][3]);
-      IHWPs.push_back(result[i][4]);
-      Wiens.push_back(result[i][5]);
-      Arms.push_back(stoi(result[i][6]));
+      type_table.push_back(types_line);
 
       RunMeans.push_back(Vals[0]);
       RunErrors.push_back(Vals[1]);
@@ -68,19 +61,19 @@ void ReadingFiles(){
   
   infile.close();
   
-  Double_t RunsArr[Runs.size()];
-  Double_t RunMeansArr[Runs.size()];
-  Double_t ZerosArr[Runs.size()];
-  Double_t RunErrorsArr[Runs.size()];
+  Double_t RunsArr[type_table.size()];
+  Double_t RunMeansArr[type_table.size()];
+  Double_t ZerosArr[type_table.size()];
+  Double_t RunErrorsArr[type_table.size()];
   for(Int_t j=0; j<i; j++){
-    RunsArr[j] = Runs[j];
+    RunsArr[j] = stoi(type_table[j][40]);
     ZerosArr[j] = 0;
     RunMeansArr[j] = RunMeans[j];
     RunErrorsArr[j] = RunErrors[j];
   }
   
   TCanvas *c1 = new TCanvas();
-  TGraphErrors *plotallruns = new TGraphErrors(Runs.size(), RunsArr, RunMeansArr, ZerosArr, RunErrorsArr);
+  TGraphErrors *plotallruns = new TGraphErrors(type_table.size(), RunsArr, RunMeansArr, ZerosArr, RunErrorsArr);
   plotallruns->SetTitle("PREX Runs Upstream DD");
   plotallruns->SetMarkerStyle(7);
   plotallruns->Draw("AP");
@@ -90,7 +83,7 @@ void ReadingFiles(){
   vector<Double_t> SlugErrors;
   vector<Double_t> SlugZeros;
   vector<Double_t> slugouts;
-  for(Int_t p = 0; p<200; p++){
+  for(Int_t p = 0; p<5000; p++){
     slugouts = GetSlugVals(p, Runs, Slugs, Arms, RunMeans, RunErrors);
     if(slugouts[0] == -1){
       continue;
