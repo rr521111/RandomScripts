@@ -1,5 +1,6 @@
 TString promptdir = "/u/group/halla/parity/software/japan_offline/prompt/prex-prompt";
 TString rrwork = "/w/hallc-scifs17exp/qweak/rradloff/crex-runlist/prex-runlist";
+TString transverse = "/volatile/halla/parity/prex-respin2/japanOutput/transverse/";
 
 TString pcrex = "PREX";
 vector<TString> types = {"arm_flag", "beam_current", "beam_energy", "bmw", "components", "component_stats", "event_count", "event_rate", "experiment", "feedback", "FFB", "flip_state", "good_charge", " helicity_frequency", "helicity_pattern", "horizontal_wien", "ihwp", "is_valid_run_end", "prompt_analysis", "respin_comment", "rhwp", "rtvs", "run_config", "run_end_time", "run_flag", "run_length", "run_prestart_time", "run_start_epoch", "run_start_time", "run_type", "session", "slug", "target_45encoder", "target_90encoder", "target_encoder", "target_type", "total_charge", "user_comment", "vertical_wien", "wac_comment", "run_number"};
@@ -28,25 +29,24 @@ void ReadingFilesTransverse(){
   Int_t i = 0;
   Int_t First = 0;
   Int_t Last = 8000;
-  while(1==1){
+  while(!infile.eof()){
     getline(infile, ins, '\n');
-    cout << endl << endl << ins << endl;
+    //cout << endl << endl << ins << endl;
     stringstream line(ins);
     types_line.clear();
-    int linenum = 0;
+    //int linenum = 0;
     while(line.good()){
       string substr;
       getline(line, substr, ',');
-      cout << linenum << ":  " << types[linenum] << " = \"" << substr << "\"" << endl;
+      //cout << linenum << ":  " << types[linenum] << " = \"" << substr << "\"" << endl;
       types_line.push_back(substr);
-      linenum++;
+      //linenum++;
     }
     
     if(types_line[31]==" " || types_line[31]=="BEGONE_COMMAS" || types_line[40]==" " || types_line[40]=="BEGONE_COMMAS"){
       continue;
     }
     
-    //cout << types_line[31].Data() << "    " << types_line[40].Data() << endl;
     TString arm = types_line[0];
     TString wien = types_line[11];
     TString ihwp = types_line[16];
@@ -56,7 +56,7 @@ void ReadingFilesTransverse(){
     TString target = types_line[35];
     Int_t run = stoi(types_line[40].Data());
 
-    if(run >= First && run <= Last && slug >= 4000 && slug <= 4500 && production == "\'Production\'" && goodbad == "\'Good\'"){
+    if(run >= First && run <= Last && slug >= 4000 && slug <= 4500 && production.Contains("Production") && goodbad.Contains("Good")){
       Vals = OpenRun(run, ihwp, wien);
       if(Vals[0] == -1){
         continue;
@@ -69,12 +69,13 @@ void ReadingFilesTransverse(){
       RunMeans.push_back(Vals[0]);
       RunErrors.push_back(Vals[1]);
       Zeros.push_back(0);
+      
+      for(int j = 0; j<round(70*(sin((i)*M_PI/20))+70); j++){
+        cout << " ";
+      }
+      cout << "Found run " << run << "..." << endl;
 
       i++;
-    }
-    
-    if(i == 100){
-      break;
     }
   }
   
@@ -134,9 +135,9 @@ void ReadingFilesTransverse(){
 }
 
 vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens){
-
+  
   vector<Double_t> vals;
-  TFile *runfile = TFile::Open(Form("%s/japanOutput/prexPrompt_pass2_%d.000.root", promptdir.Data(), runnum), "READ");
+  TFile *runfile = TFile::Open(Form("%s/prexPrompt_pass2_%d.000.root", transverse.Data(), runnum), "READ");
   if(runfile==NULL){
     vals = {-1, -1};
     return vals;
@@ -148,7 +149,6 @@ vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens){
 
   mulc_lrb_alldet_tree->AddFriend("mul");
 
-  cout << "inside " << runnum << endl;
   Int_t test = mulc_lrb_alldet_tree->Draw("cor_asym_us_dd:Entry$>>htemp()","mul.ErrorFlag==0","goff");
   if(test==-1){
     vals = {-1, -1};
@@ -157,10 +157,10 @@ vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens){
   
   Int_t ihwp = 1;
   Int_t wien = 1;
-  if(ihwps == "'IN'"){
+  if(ihwps.Contains("IN")){
     ihwp = -1;
   }
-  if(wiens == "'FLIP-RIGHT'"){
+  if(wiens.Contains("UP")){
     wien = -1;
   }
 

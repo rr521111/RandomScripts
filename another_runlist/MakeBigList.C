@@ -20,7 +20,7 @@ void MakeBigList(){
         run_numbers.push_back(i);
         
         //makes the status wiggle. partly for fun, partly as a visual cue.
-        for(int j = 0; j<round(40*(sin((i-istart)*M_PI/20))+40); j++){
+        for(int j = 0; j<round(70*(sin((i-istart)*M_PI/20))+70); j++){
             cout << " ";
         }
         cout << "Finished run " << i << "..." << endl;
