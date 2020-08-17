@@ -1,6 +1,6 @@
 TString promptdir = "/u/group/halla/parity/software/japan_offline/prompt/prex-prompt";
 TString rrwork = "/w/hallc-scifs17exp/qweak/rradloff/crex-runlist/prex-runlist";
-TString transverse = "/volatile/halla/parity/prex-respin2/japanOutput/transverse/";
+TString transverse = "$QW_ROOTFILES";
 
 TString pcrex = "PREX";
 vector<TString> types = {"arm_flag", "beam_current", "beam_energy", "bmw", "components", "component_stats", "event_count", "event_rate", "experiment", "feedback", "FFB", "flip_state", "good_charge", " helicity_frequency", "helicity_pattern", "horizontal_wien", "ihwp", "is_valid_run_end", "prompt_analysis", "respin_comment", "rhwp", "rtvs", "run_config", "run_end_time", "run_flag", "run_length", "run_prestart_time", "run_start_epoch", "run_start_time", "run_type", "session", "slug", "target_45encoder", "target_90encoder", "target_encoder", "target_type", "total_charge", "user_comment", "vertical_wien", "wac_comment", "run_number"};
@@ -130,6 +130,14 @@ void ReadingFilesTransverse(){
   plotallslugs->SetTitle("PREX Slugs Upstream DD");
   plotallslugs->SetMarkerStyle(7);
   plotallslugs->Draw("AP");
+
+  vector<vector<Double_t>> Ca48;
+  vector<vector<Double_t>> Ca40;
+  vector<vector<Double_t>> Pb208;
+  vector<vector<Double_t>> Carbon;
+  
+  TCanvas *c3 = new TCanvas();
+  c3->Divide(2,2);
  
   return;
 }
@@ -160,7 +168,7 @@ vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens){
   if(ihwps.Contains("IN")){
     ihwp = -1;
   }
-  if(wiens.Contains("UP")){
+  if(wiens.Contains("DOWN")){
     wien = -1;
   }
 
@@ -214,4 +222,6 @@ vector<Double_t> GetSlugVals(Int_t slugnum, vector<Int_t> runs, vector<Int_t> sl
 
   return slugmeanerr;  
 }
+
+
 
