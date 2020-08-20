@@ -161,12 +161,12 @@ vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens) {
 
     //find the trees we need.
     TTree* mul_tree = (TTree*)gROOT->FindObject("mul");
-    TTree* mulc_lrb_alldet_tree = (TTree*)gROOT->FindObject("mulc_lrb_alldet");
+    TTree* mulc_lrb_tree = (TTree*)gROOT->FindObject("mulc_lrb");
 
     //friend the trees so they share error codes.
-    mulc_lrb_alldet_tree->AddFriend("mul");
+    mulc_lrb_tree->AddFriend("mul");
 
-    Int_t test = mulc_lrb_alldet_tree->Draw("cor_asym_us_dd:Entry$>>htemp()", "mul.ErrorFlag==0", "goff");
+    Int_t test = mulc_lrb_tree->Draw("10^9*cor_asym_us_dd:Entry$>>htemp()", "mul.ErrorFlag==0", "goff");
     if (test == -1) {
         vals = { -1, -1 };
         return vals;
@@ -175,7 +175,7 @@ vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens) {
     //selects the sign.
     Int_t ihwp = 1;
     Int_t wien = 1;
-    if (ihwps.Contains("IN")) {
+    if (ihwps.Contains("OUT")) {
         ihwp = -1;
     }
     if (wiens.Contains("DOWN")) {
@@ -183,7 +183,7 @@ vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens) {
     }
 
     TH2F* hout = (TH2F*)gROOT->FindObject("htemp");
-    vals = { (Double_t)runnum, ihwp * wien * hout->GetMean(2), 0, hout->GetRMS(2) };
+    vals = { (Double_t)runnum, ihwp * wien * hout->GetMean(2), 0, hout->GetMeanError(2) };
 
     runfile->Close();
 
