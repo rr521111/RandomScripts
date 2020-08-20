@@ -16,8 +16,11 @@ vector<Double_t> GetSlugVals(Int_t slugnum, vector<Int_t> runs, vector<Int_t> sl
 
 //takes a vector of vectors and returns a tgrapherrors. (lol why is this not built in?)
 TGraphErrors* PlotFromMatrix(vector<vector<Double_t>> data, TString title);
+  
+//takes the matrix format mentioned above and plots the second column(means)
+TH1D* HistFromMatrix(vector<vector<Double_t>> data, TString title);
 
-void ReadingFilesTransverse() {
+void ReadingFiles() {
 
     vector<vector<TString>> type_table;
 
@@ -65,7 +68,7 @@ void ReadingFilesTransverse() {
         Int_t run = stoi(types_line[40].Data());
 
         //first filter to decide which runs to keep. usually production and good are safe bets.
-        if (run >= First && run <= Last && production.Contains("Production") && goodbad.Contains("Good")) {
+        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good") && arm.Contains("0")) {
             Vals = OpenRun(run, ihwp, wien);
             if (Vals[0] == -1) {
                 continue;
@@ -96,8 +99,15 @@ void ReadingFilesTransverse() {
     RunPlot->Fit("pol0");
 
     TCanvas* c1 = new TCanvas();
+    c1->Divide(2,1);
+    c1->cd(1);
     gStyle->SetOptFit(1);
     RunPlot->Draw("AP");
+    c1->cd(2);
+    TH1D* RunHist = HistFromMatrix(Vals_table, "PREX Runs Upstream DD");
+    RunHist->Fit("gaus");
+    gStyle->SetOptFit(1);
+    RunHist->Draw();
 
     vector<vector<Double_t>> slugouts_table;
     vector<Double_t> slugouts;
@@ -115,8 +125,15 @@ void ReadingFilesTransverse() {
     SlugPlot->Fit("pol0");
 
     TCanvas* c2 = new TCanvas();
+    c2->Divide(2,1);
+    c2->cd(1);
     gStyle->SetOptFit(1);
     SlugPlot->Draw("AP");
+    c2->cd(2);
+    TH1D* SlugHist = HistFromMatrix(slugouts_table, "PREX Slugs Upstream DD");
+    SlugHist->Fit("gaus");
+    gStyle->SetOptFit(1);
+    SlugHist->Draw();
 
     return;
 }
@@ -138,7 +155,7 @@ vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens) {
     //friend the trees so they share error codes.
     mulc_lrb_alldet_tree->AddFriend("mul");
 
-    Int_t test = mulc_lrb_alldet_tree->Draw("cor_asym_us_dd:Entry$>>htemp()", "mul.ErrorFlag==0", "goff");
+    Int_t test = mulc_lrb_alldet_tree->Draw("cor_asym_us_dd*10^9:Entry$>>htemp()", "mul.ErrorFlag==0", "goff");
     if (test == -1) {
         vals = { -1, -1 };
         return vals;
@@ -170,14 +187,14 @@ vector<Double_t> GetSlugVals(Int_t slugnum, vector<Int_t> runs, vector<Int_t> sl
     //loops through runs in list for ones that match slugnum
     for (Int_t i = 0; i < runs.size(); i++) {
         if (slugs[i] == slugnum) {
-            if(!arms[i].Contains("0")){
-              return slugmeanerr;
-            }
+            //if(!arms[i].Contains("0")){
+            //  continue;
+            //}
             slugouts.push_back({ (Double_t)runs[i], means[i], 0, errors[i] });
         }
     }
 
-    if (slugouts.size() == 0) {
+    if (slugouts.size() < 2) {
         return slugmeanerr;
     }
 
@@ -204,6 +221,21 @@ TGraphErrors* PlotFromMatrix(vector<vector<Double_t>> data, TString title) {
     TGraphErrors* output = new TGraphErrors(data.size(), x, y, ex, ey);
     output->SetTitle(title);
     output->SetMarkerStyle(7);
+
+    return output;
+}
+
+TH1D* HistFromMatrix(vector<vector<Double_t>> data, TString title) {
+
+    TH1D* output = new TH1D(title, title, 50, 1, 0);
+
+    //Double_t x[data.size()];
+    for (Int_t i = 0; i < data.size(); i++) {
+        //x[i] = data[i][1];
+        output->Fill(data[i][1]);
+    }
+
+    output->SetTitle(title);
 
     return output;
 }
