@@ -172,7 +172,7 @@ vector<Double_t> OpenRun(Int_t runnum, TString ihwps, TString wiens) {
     }
 
     TH2F* hout = (TH2F*)gROOT->FindObject("htemp");
-    vals = { (Double_t)runnum, ihwp * wien * hout->GetMean(2), 0, hout->GetRMS(2) };
+    vals = { (Double_t)runnum, ihwp * wien * hout->GetMean(2), 0, hout->GetMeanError(2) };
 
     runfile->Close();
 
@@ -183,6 +183,7 @@ vector<Double_t> GetSlugVals(Int_t slugnum, vector<Int_t> runs, vector<Int_t> sl
     vector<Double_t> slugmeanerr = { -1,-1 };
 
     vector<vector<Double_t>> slugouts;
+    TH2D* plot = new TH2D("", "", 50, 1, 0, 50, 1, 0);
 
     //loops through runs in list for ones that match slugnum
     for (Int_t i = 0; i < runs.size(); i++) {
@@ -190,6 +191,7 @@ vector<Double_t> GetSlugVals(Int_t slugnum, vector<Int_t> runs, vector<Int_t> sl
             //if(!arms[i].Contains("0")){
             //  continue;
             //}
+            plot->Fill(runs[i],means[i]);
             slugouts.push_back({ (Double_t)runs[i], means[i], 0, errors[i] });
         }
     }
@@ -198,9 +200,7 @@ vector<Double_t> GetSlugVals(Int_t slugnum, vector<Int_t> runs, vector<Int_t> sl
         return slugmeanerr;
     }
 
-    TGraphErrors* plot = PlotFromMatrix(slugouts, "SlugPlot");
-
-    slugmeanerr = { (Double_t)slugnum, plot->GetMean(2), 0, plot->GetRMS(2) };
+    slugmeanerr = { (Double_t)slugnum, plot->GetMean(2), 0, plot->GetMeanError(2) };
 
     return slugmeanerr;
 }
