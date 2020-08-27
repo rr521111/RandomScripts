@@ -14,10 +14,10 @@ vector<Double_t> ConvertToCart(vector<Double_t> vector);
 
 vector<Double_t> ConvertToSpherical(vector<Double_t> vector);
 
-Double_t r = 1000;
-Int_t Iterations = 2; 
+Double_t r = 10000;
+//Int_t Iterations = 3; 
 
-void SphereMapping(){
+void SphereMapping(Int_t Iterations = 0){
     vector<vector<Double_t>> Icosahedron = {
         {0, 1, (1+sqrt(5))/sqrt(2)},
         {0, -1, (1+sqrt(5))/sqrt(2)},
@@ -87,9 +87,13 @@ void SphereMapping(){
 
     TH3D* visual = new TH3D("", "", 100, -1000, 1000, 100, -1000, 1000, 100, -1000, 1000);
 
+    ofstream file;
+    file.open("table.wrl");
     for(Int_t i = 0; i < Icosahedron.size(); i++){
         visual->Fill(Icosahedron[i][0], Icosahedron[i][1], Icosahedron[i][2]);
+        file << Icosahedron[i][0] << " " << Icosahedron[i][0] << " " << Icosahedron[i][0] << "," << endl;
     }
+    file.close();
 
     gStyle->SetCanvasPreferGL(1);
     visual->SetMarkerStyle(7);
@@ -98,6 +102,8 @@ void SphereMapping(){
     for(Int_t i = 1; i < test.size(); i++){
         test[i]->Draw("same");
     }
+
+    return;
     //visual->Draw();
 }
 
@@ -124,12 +130,33 @@ vector<vector<Double_t>> FindNearestNeighbors(vector<Double_t> vertex, vector<ve
             }
         }
 
-        if(Neighbors.size()==6){
-           break;
+        if(Neighbors.size()>=6){
+            break;
         }
 
         Neighbors.clear();
     }
+
+    if(Neighbors.size()>6){
+        vector<vector<Double_t>> distances;
+        vector<vector<Double_t>> temp;
+
+        for(Int_t i = 0; i < Neighbors.size(); i++){
+            distance = sqrt(pow((vertex[0]-current_solid[i][0]), 2) + pow((vertex[1]-current_solid[i][1]), 2) + pow((vertex[2]-current_solid[i][2]), 2));
+            distances.push_back({distance, (Double_t)i});
+        }
+
+        sort(distances.begin(), distances.end());
+
+        for(Int_t i = 0; i < 6; i++){
+            temp.push_back(Neighbors[(Int_t)distances[i][1]]);
+            //cout << distances[i][0] << ", " << distances[i][1] << endl;
+        }
+
+        Neighbors = temp;
+    }
+
+
     
     return Neighbors;
 }
@@ -200,7 +227,7 @@ vector<vector<Int_t>> FindMissingEdges(Int_t oldverts, vector<vector<Double_t>> 
     vector<vector<Double_t>> NearestNeighbors;
     for(Int_t i = 0; i < current_solid.size(); i++){
         NearestNeighbors = FindNearestNeighbors(current_solid[i], current_solid);
-        cout << NearestNeighbors.size() << endl;
+        //cout << NearestNeighbors.size() << endl;
         
         for(Int_t k = 0; k < NearestNeighbors.size(); k++){
             Bool_t exists = false;
