@@ -68,7 +68,7 @@ void ReadingFiles() {
         Int_t run = stoi(types_line[40].Data());
 
         //first filter to decide which runs to keep. usually production and good are safe bets.
-        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good") && arm.Contains("0")) {
+        if (run >= First && run <= Last && run != 3140 && slug == 14 && production.Contains("Production") && goodbad.Contains("Good") && arm.Contains("0")) {
             Vals = OpenRun(run, ihwp, wien);
             if (Vals[0] == -1) {
                 continue;
