@@ -4,9 +4,9 @@ vector<TString> GetRunInfo(int run);
 
 void MakeBigList(){
     
-    //runrange to query. 2700-5000 prex, 5000-8000 crex
-    int istart = 2000;
-    int iend = 8000;
+    //runrange to query. 2567-5000 prex, 5000-8572 crex
+    int istart = 2566;
+    int iend = 8573;
     vector<int> run_numbers;
 
     vector<vector<TString>> Table;
