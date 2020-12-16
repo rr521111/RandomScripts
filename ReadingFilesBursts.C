@@ -1,8 +1,7 @@
 //##This script is deigned to loop through a runlist and calculate means and errors of values in those runs. Currently setup to find the asymmetry across all runs.
 
 TString promptdir = "/u/group/halla/parity/software/japan_offline/prompt/prex-prompt";
-TString rrwork = "/w/hallc-scifs17exp/qweak/rradloff/crex-runlist/prex-runlist";
-TString transverse = "$QW_ROOTFILES";
+TString rootfiles = "$QW_ROOTFILES";
 
 //goal settings
 TString Tree = "burst_mulc_lrb_alldet";
@@ -63,8 +62,8 @@ void ReadingFilesBursts() {
     vector<Double_t> RunErrors;
 
     Int_t i = 0;
-    Int_t First = 3305; // 3305
-    Int_t Last = 4980; // 4980
+    Int_t First = 8400; // 3305
+    Int_t Last = 8404; // 4980
     while (!infile.eof()) {
         //splits the file at line breaks
         getline(infile, ins, '\n');
@@ -114,13 +113,13 @@ void ReadingFilesBursts() {
             }
 
             //wiggly status message
-            /*for (int j = 0; j < round(70 * (sin((i)*M_PI / 20)) + 70); j++) {
+            for (int j = 0; j < round(70 * (sin((i)*M_PI / 20)) + 70); j++) {
                 cout << " ";
             }
             cout << "Found run " << run << " with " << minirun << " miniruns..." << endl;
 
-            i++;*/
-            //}
+            i++;
+            
         }
     }
 
@@ -173,7 +172,7 @@ vector<vector<Double_t>> OpenRun(Int_t runnum, TString ihwps, TString wiens, TSt
 
     vector<vector<Double_t>> vals;
     //open the rootfile, crash if not available.
-    TFile* runfile = TFile::Open(Form("%s/prexPrompt_pass2_%d.000.root", transverse.Data(), runnum), "READ");
+    TFile* runfile = TFile::Open(Form("%s/prexPrompt_pass2_%d.000.root", rootfiles.Data(), runnum), "READ");
     if (runfile == NULL) {
         vals = {{ -1, -1 }};
         return vals;
@@ -206,6 +205,7 @@ vector<vector<Double_t>> OpenRun(Int_t runnum, TString ihwps, TString wiens, TSt
     TBranch* b3 = lrb_alldet->GetBranch("good_count");
 
     if(b1 == NULL || b2 == NULL || b3 == NULL){
+        //cout << "Cant find branches in tree for run " << runnum << endl;
         vals = {{ -1, -1 }};
         return vals;
     }
@@ -238,8 +238,9 @@ vector<vector<Double_t>> OpenRun(Int_t runnum, TString ihwps, TString wiens, TSt
         b1->GetEntry(j);
         b2->GetEntry(j);
         b3->GetEntry(j);
-        if(goodcount->GetValue(0) == 0 || count->GetValue(0) <= 4500){
+        if(count->GetValue(0) <= 4500){ //goodcount->GetValue(0) == 0 || 
             vals = {{ -1, -1 }};
+            //cout << "Ignoring minirun " << runnum << "." << j/(entries) << " with " << count->GetValue(0) << " counts." << endl;
             return vals;
         }
         
