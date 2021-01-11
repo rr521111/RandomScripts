@@ -62,8 +62,8 @@ void ReadingFilesBursts() {
     vector<Double_t> RunErrors;
 
     Int_t i = 0;
-    Int_t First = 8400; // 3305
-    Int_t Last = 8404; // 4980
+    Int_t First = 8000; // 3305
+    Int_t Last = 9000; // 4980
     while (!infile.eof()) {
         //splits the file at line breaks
         getline(infile, ins, '\n');
@@ -244,14 +244,15 @@ vector<vector<Double_t>> OpenRun(Int_t runnum, TString ihwps, TString wiens, TSt
             return vals;
         }
         
-        cout << runnum << ", " << j << endl;
+        //cout << runnum << ", " << j << endl;
+        //cout << static_cast<double>(runnum)+(static_cast<double>(j)/(entries)) << endl;
 
         thiscount = lastcount + count->GetValue(0);
         //mul->Draw(Form("(mulc_lrb_alldet.%s-mulc_lrb_burst.%s)*1000000000>>htemp%d()", ValueLeaf.Data(), ValueLeaf.Data(), j), Form("ErrorFlag==0 && Entry$>=%d && Entry$<%d", lastcount, thiscount), "goff");
         //htemp = (TH1F*)gROOT->FindObject(Form("htemp%d", j));
 
         //vals.push_back({runnum+j/10.0, ihwp * wien * (values->GetValue(0)-panvalues->GetValue(0))*1000000000, 0, htemp->GetMeanError()});
-        vals.push_back({static_cast<double>(runnum+j/(entries)), ihwp * wien * panvalues->GetValue(0)*1000000000, 0, panerrors->GetValue(0)*1000000000});
+        vals.push_back({static_cast<double>(runnum)+(static_cast<double>(j)/(entries)), ihwp * wien * panvalues->GetValue(0)*1000000000, 0, panerrors->GetValue(0)*1000000000});
     }
 
     runfile->Close();
