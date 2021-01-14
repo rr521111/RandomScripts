@@ -66,6 +66,7 @@ void ReadingFilesCompareRespins() {
     Int_t total = 0;
     Int_t i = 0;
     Int_t First = 5408; // 3305
+    //Int_t Last = 5420;
     Int_t Last =8559; // 4980
     while (!infile.eof()) {
         //splits the file at line breaks
@@ -104,7 +105,7 @@ void ReadingFilesCompareRespins() {
 
             //Vals[0][1] = Vals[0][1] - Vals2[0][1];
             total += Vals[0][1];
-            cout << run << " " << Vals[0][1] << endl;
+            //cout << run << " " << Vals[0][1] << endl;
 
             type_table.push_back(types_line);
             int minirun = 0;
@@ -244,25 +245,25 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, TString ihwps,
     Int_t lastcount = 0;
     Int_t thiscount = 0;
     TH1F* htemp;
-    //for(int j = 0; j<entries; j++){
-        //b1->GetEntry(j);
-        //b2->GetEntry(j);
-        //b3->GetEntry(j);
+    for(int j = 0; j<entries; j++){
+        b1->GetEntry(j);
+        b2->GetEntry(j);
+        b3->GetEntry(j);
         //if(count->GetValue(0) <= 4500){ //goodcount->GetValue(0) == 0 || 
         //    vals = {{ -1, -1 }};
             //cout << "Ignoring minirun " << runnum << "." << j/(entries) << " with " << count->GetValue(0) << " counts." << endl;
         //    return vals;
         //}
         
-        //cout << runnum << ", " << j << endl;
+        cout << runnum+j/static_cast<double>(entries) << ", " << count->GetValue(0) << ", " << ihwp * wien * (values->GetValue(0)-panvalues->GetValue(0))*1000000000 << ", " << panerrors->GetValue(0)*1000000000 << endl;
 
         thiscount = lastcount + count->GetValue(0);
-        mul->Draw("(asym_usl)*1000000000>>htemp()", "ErrorFlag==0", "goff");
-        htemp = (TH1F*)gROOT->FindObject("htemp");
+        //mul->Draw(Form("(mulc_lrb_alldet.%s-mulc_lrb_burst.%s)*1000000000>>htemp%d()", ValueLeaf.Data(), ValueLeaf.Data(), j), Form("ErrorFlag==0 && Entry$>=%d && Entry$<%d", lastcount, thiscount), "goff");
+        //htemp = (TH1F*)gROOT->FindObject(Form("htemp%d", j));
 
         //vals.push_back({runnum+j/10.0, ihwp * wien * (values->GetValue(0)-panvalues->GetValue(0))*1000000000, 0, htemp->GetMeanError()});
-        vals.push_back({static_cast<double>(runnum), htemp->GetEntries(), 0, 0});
-    //}
+        vals.push_back({runnum+j/static_cast<double>(entries), ihwp * wien * (values->GetValue(0)-panvalues->GetValue(0))*1000000000, 0, panerrors->GetValue(0)*1000000000});
+    }
 
     runfile->Close();
 
