@@ -255,14 +255,14 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, TString ihwps,
         //    return vals;
         //}
         
-        cout << runnum << ", " << j << ", " << count->GetValue(0) << ", " << ihwp * wien * (values->GetValue(0)-panvalues->GetValue(0))*1000000000 << ", " << panerrors->GetValue(0)*1000000000 << endl;
+        cout << runnum << ", " << j << ", " << count->GetValue(0) << ", " << ihwp * wien * panvalues->GetValue(0)*1000000000 << ", " << panerrors->GetValue(0)*1000000000 << endl;
 
         thiscount = lastcount + count->GetValue(0);
         //mul->Draw(Form("(mulc_lrb_alldet.%s-mulc_lrb_burst.%s)*1000000000>>htemp%d()", ValueLeaf.Data(), ValueLeaf.Data(), j), Form("ErrorFlag==0 && Entry$>=%d && Entry$<%d", lastcount, thiscount), "goff");
         //htemp = (TH1F*)gROOT->FindObject(Form("htemp%d", j));
 
         //vals.push_back({runnum+j/10.0, ihwp * wien * (values->GetValue(0)-panvalues->GetValue(0))*1000000000, 0, htemp->GetMeanError()});
-        vals.push_back({runnum+j/static_cast<double>(entries), ihwp * wien * (values->GetValue(0)-panvalues->GetValue(0))*1000000000, 0, panerrors->GetValue(0)*1000000000});
+        vals.push_back({runnum+j/static_cast<double>(entries), ihwp * wien * panvalues->GetValue(0)*1000000000, 0, panerrors->GetValue(0)*1000000000});
     }
 
     runfile->Close();
