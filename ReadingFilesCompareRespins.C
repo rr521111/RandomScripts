@@ -96,7 +96,7 @@ void ReadingFilesCompareRespins() {
         Int_t run = stoi(types_line[40].Data());
 
         //first filter to decide which runs to keep. usually production and good are safe bets.
-        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good")){// && arm.Contains("0")) {
+        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good") && target.Contains("40") && (wien.Contains("RIGHT") || wien.Contains("LEFT"))){// && arm.Contains("0")) {
             Vals = OpenRun(rootfiles, run, ihwp, wien, arm);
             //Vals2 = OpenRun(rootfiles2, run, ihwp, wien, arm);
             if (Vals[0][0] == -1) {
