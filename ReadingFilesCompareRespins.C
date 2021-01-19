@@ -33,7 +33,7 @@ vector<TString> types = { "arm_flag", "beam_current", "beam_energy", "bmw", "com
 vector<TString> types_line = { " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " " };
 
 //opens the rootfile for a a given run, sign corrects, then returns the mean and error.
-vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, TString ihwps, TString wiens, TString arm);
+vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, Int_t slugnum, TString ihwps, TString wiens, TString arm, vector<vector<Double_t>> textmatrix);
 
 //averages the means for miniruns in a given slug, returns the slug mean and error.
 vector<Double_t> GetSlugVals(Int_t slugnum, vector<Double_t> miniruns, vector<Int_t> slugs, vector<TString> arms, vector<Double_t> means, vector<Double_t> errors);
@@ -47,6 +47,7 @@ TH1D* HistFromMatrix(vector<vector<Double_t>> data, TString title);
 void ReadingFilesCompareRespins() {
 
     vector<vector<TString>> type_table;
+    remove("./ComparisonOutputs/outputold.txt");
 
     ifstream infile;
     infile.open("./another_runlist/pcrex_run_data.list");
@@ -62,6 +63,7 @@ void ReadingFilesCompareRespins() {
     vector<vector<Double_t>> Vals2;
     vector<Double_t> RunMeans;
     vector<Double_t> RunErrors;
+    vector<vector<Double_t>> textmatrix;
 
     Int_t total = 0;
     Int_t i = 0;
@@ -96,8 +98,8 @@ void ReadingFilesCompareRespins() {
         Int_t run = stoi(types_line[40].Data());
 
         //first filter to decide which runs to keep. usually production and good are safe bets.
-        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good") && target.Contains("40") && (wien.Contains("RIGHT") || wien.Contains("LEFT"))){// && arm.Contains("0")) {
-            Vals = OpenRun(rootfiles, run, ihwp, wien, arm);
+        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good")){// && target.Contains("48") && (wien.Contains("RIGHT") || wien.Contains("LEFT"))){
+            Vals = OpenRun(rootfiles, run, slug, ihwp, wien, arm, textmatrix);
             //Vals2 = OpenRun(rootfiles2, run, ihwp, wien, arm);
             if (Vals[0][0] == -1) {
                 continue;
@@ -179,7 +181,7 @@ void ReadingFilesCompareRespins() {
     return;
 }
 
-vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, TString ihwps, TString wiens, TString arm) {
+vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, Int_t slugnum, TString ihwps, TString wiens, TString arm, vector<vector<Double_t>> textmatrix) {
 
     vector<vector<Double_t>> vals;
     //open the rootfile, crash if not available.
@@ -255,8 +257,11 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, TString ihwps,
         //    return vals;
         //}
         
-        cout << runnum << ", " << j << ", " << count->GetValue(0) << ", " << ihwp * wien * panvalues->GetValue(0)*1000000000 << ", " << panerrors->GetValue(0)*1000000000 << endl;
-
+        ofstream outfile;
+        outfile.open("./ComparisonOutputs/outputold.txt",  std::ofstream::out | std::ofstream::app);
+        outfile << runnum << ", " << j << ", " << slugnum << ", " << count->GetValue(0) << ", " << ihwp * wien * panvalues->GetValue(0)*1000000000 << ", " << panerrors->GetValue(0)*1000000000 << endl;
+        outfile.close();
+        
         thiscount = lastcount + count->GetValue(0);
         //mul->Draw(Form("(mulc_lrb_alldet.%s-mulc_lrb_burst.%s)*1000000000>>htemp%d()", ValueLeaf.Data(), ValueLeaf.Data(), j), Form("ErrorFlag==0 && Entry$>=%d && Entry$<%d", lastcount, thiscount), "goff");
         //htemp = (TH1F*)gROOT->FindObject(Form("htemp%d", j));
