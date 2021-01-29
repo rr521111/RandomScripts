@@ -246,7 +246,10 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, Int_t slugnum,
 
     Int_t lastcount = 0;
     Int_t thiscount = 0;
-    TH1F* htemp;
+    TH1F* bpm4eXhtemp;
+    TH1F* bpm4eYhtemp;
+    TH1F* bpm4aXhtemp;
+    TH1F* bpm4aYhtemp;
     for(int j = 0; j<entries; j++){
         b1->GetEntry(j);
         b2->GetEntry(j);
@@ -256,15 +259,21 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, Int_t slugnum,
             //cout << "Ignoring minirun " << runnum << "." << j/(entries) << " with " << count->GetValue(0) << " counts." << endl;
         //    return vals;
         //}
+
+        thiscount = lastcount + count->GetValue(0);
+        mul->Draw(Form("yield_bpm4eX*1000000000>>bpm4eXhtemp%d()", j), Form("ErrorFlag==0 && Entry$>=%d && Entry$<%d", lastcount, thiscount), "goff");
+        bpm4eXhtemp = (TH1F*)gROOT->FindObject(Form("bpm4eXhtemp%d", j));
+        mul->Draw(Form("yield_bpm4eY*1000000000>>bpm4eYhtemp%d()", j), Form("ErrorFlag==0 && Entry$>=%d && Entry$<%d", lastcount, thiscount), "goff");
+        bpm4eYhtemp = (TH1F*)gROOT->FindObject(Form("bpm4eYhtemp%d", j));
+        mul->Draw(Form("yield_bpm4aX*1000000000>>bpm4aXhtemp%d()", j), Form("ErrorFlag==0 && Entry$>=%d && Entry$<%d", lastcount, thiscount), "goff");
+        bpm4aXhtemp = (TH1F*)gROOT->FindObject(Form("bpm4aXhtemp%d", j));
+        mul->Draw(Form("yield_bpm4aY*1000000000>>bpm4aYhtemp%d()", j), Form("ErrorFlag==0 && Entry$>=%d && Entry$<%d", lastcount, thiscount), "goff");
+        bpm4aYhtemp = (TH1F*)gROOT->FindObject(Form("bpm4aYhtemp%d", j));
         
         ofstream outfile;
         outfile.open("./ComparisonOutputs/outputnewca48.txt",  std::ofstream::out | std::ofstream::app);
-        outfile << runnum << ", " << j << ", " << slugnum << ", " << count->GetValue(0) << ", " << ihwp * wien * panvalues->GetValue(0)*1000000000 << ", " << panerrors->GetValue(0)*1000000000 << endl;
+        outfile << runnum << ", " << j << ", " << slugnum << ", " << count->GetValue(0) << ", " << ihwp * wien * panvalues->GetValue(0)*1000000000 << ", " << panerrors->GetValue(0)*1000000000 << ", " << bpm4eXhtemp->GetMean() << ", " << bpm4eXhtemp->GetMeanError() << ", " << bpm4eYhtemp->GetMean() << ", " << bpm4eYhtemp->GetMeanError() << ", " << bpm4aXhtemp->GetMean() << ", " << bpm4aXhtemp->GetMeanError() << ", " << bpm4aYhtemp->GetMean() << ", " << bpm4aYhtemp->GetMeanError() << endl;
         outfile.close();
-        
-        thiscount = lastcount + count->GetValue(0);
-        //mul->Draw(Form("(mulc_lrb_alldet.%s-mulc_lrb_burst.%s)*1000000000>>htemp%d()", ValueLeaf.Data(), ValueLeaf.Data(), j), Form("ErrorFlag==0 && Entry$>=%d && Entry$<%d", lastcount, thiscount), "goff");
-        //htemp = (TH1F*)gROOT->FindObject(Form("htemp%d", j));
 
         //vals.push_back({runnum+j/10.0, ihwp * wien * (values->GetValue(0)-panvalues->GetValue(0))*1000000000, 0, htemp->GetMeanError()});
         vals.push_back({runnum+j/static_cast<double>(entries), ihwp * wien * panvalues->GetValue(0)*1000000000, 0, panerrors->GetValue(0)*1000000000});
