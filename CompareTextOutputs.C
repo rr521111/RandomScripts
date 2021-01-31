@@ -8,6 +8,14 @@ void CompareTextOutputs(){
     vector<Int_t> counts1;
     vector<Double_t> asymmetries1;
     vector<Double_t> errors1;
+    vector<Double_t> bpm4ex1;
+    vector<Double_t> bpm4exerrors1;
+    vector<Double_t> bpm4ey1;
+    vector<Double_t> bpm4eyerrors1;
+    vector<Double_t> bpm4ax1;
+    vector<Double_t> bpm4axerrors1;
+    vector<Double_t> bpm4ay1;
+    vector<Double_t> bpm4ayerrors1;
 
     vector<Int_t> runs2;
     vector<Int_t> miniruns2;
@@ -15,6 +23,14 @@ void CompareTextOutputs(){
     vector<Int_t> counts2;
     vector<Double_t> asymmetries2;
     vector<Double_t> errors2;
+    vector<Double_t> bpm4ex2;
+    vector<Double_t> bpm4exerrors2;
+    vector<Double_t> bpm4ey2;
+    vector<Double_t> bpm4eyerrors2;
+    vector<Double_t> bpm4ax2;
+    vector<Double_t> bpm4axerrors2;
+    vector<Double_t> bpm4ay2;
+    vector<Double_t> bpm4ayerrors2;
 
     Int_t totalcounts1 = 0;
     Int_t totalcounts2 = 0;
@@ -47,7 +63,15 @@ void CompareTextOutputs(){
         counts1.push_back(stoi(types_line[3].Data()));
         asymmetries1.push_back(stod(types_line[4].Data()));
         errors1.push_back(stod(types_line[5].Data()));
-        //errors1.push_back(stod(types_line[4].Data())/sqrt(stod(types_line[2].Data())));
+        bpm4ex1.push_back(stod(types_line[6].Data()));
+        bpm4exerrors1.push_back(stod(types_line[7].Data()));
+        bpm4ey1.push_back(stod(types_line[8].Data()));
+        bpm4eyerrors1.push_back(stod(types_line[9].Data()));
+        bpm4ax1.push_back(stod(types_line[10].Data()));
+        bpm4axerrors1.push_back(stod(types_line[11].Data()));
+        bpm4ay1.push_back(stod(types_line[12].Data()));
+        bpm4ayerrors1.push_back(stod(types_line[13].Data()));
+        
  
         totalcounts1+=stoi(types_line[3].Data());
         
@@ -81,7 +105,14 @@ void CompareTextOutputs(){
         counts2.push_back(stoi(types_line[3].Data()));
         asymmetries2.push_back(stod(types_line[4].Data()));
         errors2.push_back(stod(types_line[5].Data()));
-        //errors2.push_back(stod(types_line[4].Data())/sqrt(stod(types_line[2].Data())));
+        bpm4ex2.push_back(stod(types_line[6].Data()));
+        bpm4exerrors2.push_back(stod(types_line[7].Data()));
+        bpm4ey2.push_back(stod(types_line[8].Data()));
+        bpm4eyerrors2.push_back(stod(types_line[9].Data()));
+        bpm4ax2.push_back(stod(types_line[10].Data()));
+        bpm4axerrors2.push_back(stod(types_line[11].Data()));
+        bpm4ay2.push_back(stod(types_line[12].Data()));
+        bpm4ayerrors2.push_back(stod(types_line[13].Data()));
         
         totalcounts2+=stoi(types_line[3].Data());
 
@@ -105,8 +136,8 @@ void CompareTextOutputs(){
     while(ministep < maxcombo+100){
         nextmini1 = 0;
         nextmini2 = 0;
-        data1 = {0, 0, 0};
-        data2 = {0, 0, 0};
+        data1 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        data2 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         runmini = {0, 0};
         for(Int_t i = 0; i < runs1.size(); i++){
             nextmini1 = runs1[i]*100 + miniruns1[i];
@@ -124,37 +155,37 @@ void CompareTextOutputs(){
         if(nextmini1<nextmini2){
             for(Int_t i = 0; i < runs1.size(); i++){
                 if(nextmini1==runs1[i]*100 + miniruns1[i]){
-                    data1 = {static_cast<Double_t>(counts1[i]), asymmetries1[i], errors1[i]};
+                    data1 = {static_cast<Double_t>(counts1[i]), asymmetries1[i], errors1[i], bpm4ex1[i], bpm4exerrors1[i], bpm4ey1[i], bpm4eyerrors1[i], bpm4ax1[i], bpm4axerrors1[i], bpm4ay1[i], bpm4ayerrors1[i]};
                     runmini = {static_cast<Double_t>(runs1[i]), static_cast<Double_t>(miniruns1[i]), static_cast<Double_t>(slugs1[i])};
                     break;
                 }
             }
             for(Int_t i = 0; i < runs2.size(); i++){
                 if(nextmini1==runs2[i]*100 + miniruns2[i]){
-                    data2 = {static_cast<Double_t>(counts2[i]), asymmetries2[i], errors2[i]};
+                    data2 = {static_cast<Double_t>(counts2[i]), asymmetries2[i], errors2[i], bpm4ex2[i], bpm4exerrors2[i], bpm4ey2[i], bpm4eyerrors2[i], bpm4ax2[i], bpm4axerrors2[i], bpm4ay2[i], bpm4ayerrors2[i]};
                     runmini = {static_cast<Double_t>(runs2[i]), static_cast<Double_t>(miniruns2[i]), static_cast<Double_t>(slugs2[i])};
                     break;
                 }
             }
-            allruns.push_back({runmini[0], runmini[1], runmini[2], data1[0], data2[0], data1[1], data2[1], data1[2], data2[2]});
+            allruns.push_back({runmini[0], runmini[1], runmini[2], data1[0], data2[0], data1[1], data2[1], data1[2], data2[2], data1[3], data2[3], data1[4], data2[4], data1[5], data2[5], data1[6], data2[6], data1[7], data2[7], data1[8], data2[8], data1[9], data2[9], data1[10], data2[10]});
             
             lastmini=nextmini1;
         }else{
             for(Int_t i = 0; i < runs1.size(); i++){
                 if(nextmini2==runs1[i]*100 + miniruns1[i]){
-                    data1 = {static_cast<Double_t>(counts1[i]), asymmetries1[i], errors1[i]};
+                    data1 = {static_cast<Double_t>(counts1[i]), asymmetries1[i], errors1[i], bpm4ex1[i], bpm4exerrors1[i], bpm4ey1[i], bpm4eyerrors1[i], bpm4ax1[i], bpm4axerrors1[i], bpm4ay1[i], bpm4ayerrors1[i]};
                     runmini = {static_cast<Double_t>(runs1[i]), static_cast<Double_t>(miniruns1[i]), static_cast<Double_t>(slugs1[i])};
                     break;
                 }
             }
             for(Int_t i = 0; i < runs2.size(); i++){
                 if(nextmini2==runs2[i]*100 + miniruns2[i]){
-                    data2 = {static_cast<Double_t>(counts2[i]), asymmetries2[i], errors2[i]};
+                    data2 = {static_cast<Double_t>(counts2[i]), asymmetries2[i], errors2[i], bpm4ex2[i], bpm4exerrors2[i], bpm4ey2[i], bpm4eyerrors2[i], bpm4ax2[i], bpm4axerrors2[i], bpm4ay2[i], bpm4ayerrors2[i]};
                     runmini = {static_cast<Double_t>(runs2[i]), static_cast<Double_t>(miniruns2[i]), static_cast<Double_t>(slugs2[i])};
                     break;
                 }
             }
-            allruns.push_back({runmini[0], runmini[1], runmini[2], data1[0], data2[0], data1[1], data2[1], data1[2], data2[2]});
+            allruns.push_back({runmini[0], runmini[1], runmini[2], data1[0], data2[0], data1[1], data2[1], data1[2], data2[2], data1[3], data2[3], data1[4], data2[4], data1[5], data2[5], data1[6], data2[6], data1[7], data2[7], data1[8], data2[8], data1[9], data2[9], data1[10], data2[10]});
 
             lastmini=nextmini2;
         }
