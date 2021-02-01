@@ -2,10 +2,21 @@ vector<TString> types_line;
 string ins;
 vector<vector<Double_t>> games;
 
+vector<vector<Double_t>> Model1(vector<vector<Double_t>> data, Double_t cutoff, Double_t betsize);
+
 TGraphErrors* PlotFromMatrix(vector<vector<Double_t>> data, TString title);
 
 void ModelBets() {
-    TH1D* gamehist = new TH1D();
+    Int_t i = 0;
+    Double_t maxindex = -1;
+    Double_t minindex = 99999999999999;
+    Double_t maxmult = -1;
+    Double_t minmult = 99999999999999;
+    Double_t index = 0;
+    Double_t mult = 0;
+    Double_t random = 0;
+    Double_t numcrash = 0;
+    srand((unsigned) time(0));
     ifstream infile;
     infile.open("./crash_game_roobet.csv");
     while (!infile.eof()) {
@@ -19,25 +30,98 @@ void ModelBets() {
             types_line.push_back(substr);
         }
 
-        cout << stod(types_line[1].Data()) << endl;
         if (types_line.size() <= 1) {
             break;
         }
 
-        cout << stod(types_line[1].Data()) << endl;
-        gamehist->Fill(stod(types_line[1].Data()));
-        games.push_back({ stod(types_line[0].Data()), stod(types_line[1].Data()), 0, 0 });
+        index = stod(types_line[0].Data());
+        mult = stod(types_line[1].Data());
+
+        if(i%100000==0){
+            cout << "Read " << i << " events." << endl;
+        }
+
+        random = (rand() % 100) + 1;
+        if(random <= 3){
+            games.push_back({index, 0, 0, 0});
+            numcrash++;
+        }else{
+            games.push_back({index, mult, 0, 0 });
+        }
+
+        if(mult>maxmult){
+            maxmult=mult;
+        }
+    
+        if(mult<minmult){
+            minmult=mult;
+        }
+
+        if(index>maxindex){
+            maxindex=index;
+        }
+        
+        if(index<minindex){
+            minindex=index;
+        }
+        i++;
+    }
+    cout << "Crash rate " << numcrash/i << endl;
+
+    TH1D* gamehist = new TH1D("First Million Crashes", "First Million Crashes", 1000, minmult-1, maxmult+1);
+    for(Int_t i = 0; i < games.size(); i++){
+        gamehist->Fill(games[i][1]);
     }
 
     TCanvas *c1 = new TCanvas();
     gamehist->Draw();
 
+    TH2D* gamehist2d = new TH2D("First Million Crashes Over Time", "First Million Crashes Over Time", 1000, minindex-1, maxindex+1, 1000, minmult-1, maxmult+1);
+    for(Int_t i = 0; i < games.size(); i++){
+        gamehist2d->Fill(games[i][0], games[i][1]);
+    }
+
     TCanvas *c2 = new TCanvas();
-    TGraphErrors *timegamehist = PlotFromMatrix(games, "First Million Crashes");
-    timegamehist->Draw("AP");
-    timegamehist->Fit("pol0");
+    gamehist2d->Draw();
+    gamehist2d->Fit("pol0");
+    gStyle->SetOptFit(1);
+
+    Double_t maxearn = -99999999999;
+    Double_t minearn = 99999999999;
+    vector<vector<Double_t>> Model1Earnings = Model1(games, 1.36, 1);
+    for(Int_t i = 0; i < Model1Earnings.size(); i++){
+        if(Model1Earnings[i][1]>maxearn){
+            maxearn=Model1Earnings[i][1];
+        }
+        if(Model1Earnings[i][1]<minearn){
+            minearn=Model1Earnings[i][1];
+        }
+    }
+
+    TH2D* Model1hist2d = new TH2D("Model1 Earnings", "Model1 Earnings", 1000, minindex-1, maxindex+1, 1000, minearn-1, maxearn+1);
+    for(Int_t i = 0; i < Model1Earnings.size(); i++){
+        Model1hist2d->Fill(Model1Earnings[i][0], Model1Earnings[i][1]);
+    }
+     
+    TCanvas *c3 = new TCanvas();
+    Model1hist2d->Draw();
+    Model1hist2d->Fit("pol1");
     gStyle->SetOptFit(1);
 }
+
+vector<vector<Double_t>> Model1(vector<vector<Double_t>> data, Double_t cutoff, Double_t betsize){
+    vector<vector<Double_t>> earnings;
+
+    for(Int_t i = 0; i < data.size(); i++){
+        if(data[i][1]>cutoff){
+            earnings.push_back({static_cast<Double_t>(i), data[i][1]*betsize, 0, 0});
+        }else{
+            earnings.push_back({static_cast<Double_t>(i), -1*betsize, 0, 0});
+        }
+    }
+
+    return earnings;
+};
 
 TGraphErrors* PlotFromMatrix(vector<vector<Double_t>> data, TString title) {
 
