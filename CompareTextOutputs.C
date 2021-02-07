@@ -40,6 +40,7 @@ void CompareTextOutputs(){
     vector<TString> types_line = { " ", " ", " ", " ", " ", " "};
     string ins;
 
+    //Reading in old data
     ifstream infile;
     infile.open("./ComparisonOutputs/outputold.txt");
     while (!infile.eof()) {
@@ -82,6 +83,7 @@ void CompareTextOutputs(){
 
     infile.close();
 
+    //Reading in new data
     ifstream infile2;
     infile2.open("./ComparisonOutputs/outputnew.txt");
     while (!infile2.eof()) {
@@ -123,6 +125,7 @@ void CompareTextOutputs(){
 
     infile2.close();
 
+    //Combining old and new data into one structure. Missing miniruns are zero'd.
     vector<vector<Double_t>> allruns;
     
     Double_t lastmini = 0;
@@ -139,6 +142,7 @@ void CompareTextOutputs(){
         data1 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         data2 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         runmini = {0, 0};
+        //Finds the next largest minirun between the two data sets. nextminis and combos shift the run number two decimals to have run/minirun in one number. 4000,11 becomes 400011
         for(Int_t i = 0; i < runs1.size(); i++){
             nextmini1 = runs1[i]*100 + miniruns1[i];
             if(nextmini1>lastmini){
@@ -151,7 +155,8 @@ void CompareTextOutputs(){
                 break;
             }
         }
-        
+
+        //loops through both data sets to see if the next largest minirun matches data in either set. It should always find one match at least. If none are found for one dataset, it is left at 0.        
         if(nextmini1<nextmini2){
             for(Int_t i = 0; i < runs1.size(); i++){
                 if(nextmini1==runs1[i]*100 + miniruns1[i]){
@@ -167,6 +172,7 @@ void CompareTextOutputs(){
                     break;
                 }
             }
+            
             allruns.push_back({runmini[0], runmini[1], runmini[2], data1[0], data2[0], data1[1], data2[1], data1[2], data2[2], data1[3], data2[3], data1[4], data2[4], data1[5], data2[5], data1[6], data2[6], data1[7], data2[7], data1[8], data2[8], data1[9], data2[9], data1[10], data2[10]});
             
             lastmini=nextmini1;
@@ -199,10 +205,19 @@ void CompareTextOutputs(){
     
     Int_t totalcounts = 0;
     
+    //Making arrays for variables vs minirun.
     vector<vector<Double_t>> comparison;
     vector<vector<Double_t>> usedcomparison;
     vector<vector<Double_t>> asymold;
     vector<vector<Double_t>> asymnew;
+    vector<vector<Double_t>> bpm4exnew;
+    vector<vector<Double_t>> bpm4exold;
+    vector<vector<Double_t>> bpm4eynew;
+    vector<vector<Double_t>> bpm4eyold;
+    vector<vector<Double_t>> bpm4axnew;
+    vector<vector<Double_t>> bpm4axold;
+    vector<vector<Double_t>> bpm4aynew;
+    vector<vector<Double_t>> bpm4ayold;
     vector<vector<Double_t>> largecountdiffs;
     Int_t usedcountsold = 0;
     Int_t usedcountsnew = 0;
@@ -212,12 +227,21 @@ void CompareTextOutputs(){
         usedcountsold = 0;
         usedcountsnew = 0;
         comparison.push_back({allruns[i][0] + allruns[i][1]/20, allruns[i][3]-allruns[i][4], 0, 0});
+        //Checks if count and asymmetry are nonzero.
         if(allruns[i][3] != 0 && allruns[i][5] != 0){
             asymold.push_back({allruns[i][0] + allruns[i][1]/20, allruns[i][5], 0, allruns[i][7]});
+            bpm4exold.push_back({allruns[i][0] + allruns[i][1]/20, allruns[i][9]/1000000000, 0, allruns[i][11]/1000000000});
+            bpm4eyold.push_back({allruns[i][0] + allruns[i][1]/20, allruns[i][13]/1000000000, 0, allruns[i][15]/1000000000});
+            bpm4axold.push_back({allruns[i][0] + allruns[i][1]/20, allruns[i][17]/1000000000, 0, allruns[i][19]/1000000000});
+            bpm4ayold.push_back({allruns[i][0] + allruns[i][1]/20, allruns[i][21]/1000000000, 0, allruns[i][23]/1000000000});
             usedcountsold = allruns[i][3];
         }
         if(allruns[i][4] != 0 && allruns[i][6] != 0){
             asymnew.push_back({allruns[i][0] + allruns[i][1]/20, allruns[i][6], 0, allruns[i][8]});
+            bpm4exnew.push_back({allruns[i][0] + allruns[i][1]/20, allruns[i][10]/1000000000, 0, allruns[i][12]/1000000000});
+            bpm4eynew.push_back({allruns[i][0] + allruns[i][1]/20, allruns[i][14]/1000000000, 0, allruns[i][16]/1000000000});
+            bpm4axnew.push_back({allruns[i][0] + allruns[i][1]/20, allruns[i][18]/1000000000, 0, allruns[i][20]/1000000000});
+            bpm4aynew.push_back({allruns[i][0] + allruns[i][1]/20, allruns[i][22]/1000000000, 0, allruns[i][24]/1000000000});
             usedcountsnew = allruns[i][4];
         }
 
@@ -237,10 +261,7 @@ void CompareTextOutputs(){
         }
     }
 
-    //for(Int_t i = 0; i < sluglist.size(); i++){
-    //    cout << sluglist[i] << endl;
-    //}
-
+    //Arrays for variabls vs run.
     vector<vector<Double_t>> runcomparison;
     vector<vector<Double_t>> usedruncomparison;
     vector<vector<Double_t>> minicomparison;
@@ -257,7 +278,7 @@ void CompareTextOutputs(){
     Double_t avgasymnewnum = 0;
     Double_t avgasymnewdenom = 0;
     cout << endl; 
-    cout << "Runs with losses >= 10000:" << endl;
+    cout << "Runs with changes >= 10000:" << endl;
     for(Int_t i = 4000; i < 10000; i++){
         numcountsold = 0;
         numcountsnew = 0;
@@ -273,6 +294,7 @@ void CompareTextOutputs(){
             if(allruns[j][0] == i){
                 numcountsold += allruns[j][3];
                 numcountsnew += allruns[j][4];
+                //Checks if counts and asym are nonzero, but counts the broken miniruns.
                 if(allruns[j][3] != 0){
                     if(allruns[j][5] != 0){
                         avgasymoldnum += allruns[j][5]/(allruns[j][7]*allruns[j][7]);
@@ -300,11 +322,10 @@ void CompareTextOutputs(){
             continue;
         }
 
-        if(numcountsold-numcountsnew >= 10000){
+        if(abs(numcountsold-numcountsnew) >= 10000){
             cout << i << " " << numcountsold-numcountsnew << endl;
         }
 
-        //cout << static_cast<Double_t>(i) << " " << avgasymoldnum/avgasymolddenom << " " << sqrt(1/avgasymolddenom) << endl;
         runcomparison.push_back({static_cast<Double_t>(i), static_cast<Double_t>(numcountsold-numcountsnew), 0, 0});
         usedruncomparison.push_back({static_cast<Double_t>(i), static_cast<Double_t>(usedcountsold-usedcountsnew), 0, 0});
         if(numminisold != 0 && usedcountsold != 0){
@@ -316,6 +337,7 @@ void CompareTextOutputs(){
         minicomparison.push_back({static_cast<Double_t>(i), numminisold-numminisnew, 0, 0});
     }
 
+    //Arrays for variables vs slug.
     vector<vector<Double_t>> slugcomparison;
     vector<vector<Double_t>> usedslugcomparison;
     vector<vector<Double_t>> slugasymold;
@@ -382,6 +404,7 @@ void CompareTextOutputs(){
 
     cout << "Total count difference: " << totalcounts1 << " " << totalcounts2 <<  " " << totalcounts1-totalcounts2 << " " << totalcounts << endl;
     
+    //Make a whole bunch of plots.
     TCanvas *c1 = new TCanvas();
     c1->Divide(1,3);
     c1->cd(1);
@@ -456,12 +479,49 @@ void CompareTextOutputs(){
     minicountplot->Draw("AP");
     minicountplot->Fit("pol0");
     gStyle->SetOptFit(1);
-    
-    /*cout << endl;
-    cout << "Miniruns with differences >= 13500:" << endl;
-    for(Int_t i = 0; i < largecountdiffs.size(); i++){
-        cout << largecountdiffs[i][0] << " " << largecountdiffs[i][1] << endl;
-    }*/
+
+    TCanvas *c4 = new TCanvas();
+    c4->Divide(2,4);
+    c4->cd(1);
+    TGraphErrors* bpm4exoldplot = PlotFromMatrix(bpm4exold, "Old bpm4eX yield Per Mini");
+    bpm4exoldplot->Draw("AP");
+    bpm4exoldplot->Fit("pol0");
+    gStyle->SetOptFit(1);
+    c4->cd(2);
+    TGraphErrors* bpm4exnewplot = PlotFromMatrix(bpm4exnew, "New bpm4eX yield Per Mini");
+    bpm4exnewplot->Draw("AP");
+    bpm4exnewplot->Fit("pol0");
+    gStyle->SetOptFit(1);
+    c4->cd(3);
+    TGraphErrors* bpm4eyoldplot = PlotFromMatrix(bpm4eyold, "Old bpm4eY yield Per Mini");
+    bpm4eyoldplot->Draw("AP");
+    bpm4eyoldplot->Fit("pol0");
+    gStyle->SetOptFit(1);
+    c4->cd(4);
+    TGraphErrors* bpm4eynewplot = PlotFromMatrix(bpm4eynew, "New bpm4eY yield Per Mini");
+    bpm4eynewplot->Draw("AP");
+    bpm4eynewplot->Fit("pol0");
+    gStyle->SetOptFit(1);
+    c4->cd(5);
+    TGraphErrors* bpm4axoldplot = PlotFromMatrix(bpm4axold, "Old bpm4aX yield Per Mini");
+    bpm4axoldplot->Draw("AP");
+    bpm4axoldplot->Fit("pol0");
+    gStyle->SetOptFit(1);
+    c4->cd(6);
+    TGraphErrors* bpm4axnewplot = PlotFromMatrix(bpm4axnew, "New bpm4aX yield Per Mini");
+    bpm4axnewplot->Draw("AP");
+    bpm4axnewplot->Fit("pol0");
+    gStyle->SetOptFit(1);
+    c4->cd(7);
+    TGraphErrors* bpm4ayoldplot = PlotFromMatrix(bpm4ayold, "Old bpm4aY yield Per Mini");
+    bpm4ayoldplot->Draw("AP");
+    bpm4ayoldplot->Fit("pol0");
+    gStyle->SetOptFit(1);
+    c4->cd(8);
+    TGraphErrors* bpm4aynewplot = PlotFromMatrix(bpm4aynew, "New bpm4aY yield Per Mini");
+    bpm4aynewplot->Draw("AP");
+    bpm4aynewplot->Fit("pol0");
+    gStyle->SetOptFit(1);
 
     cout << endl;
     cout << "Old miniruns with failed reg:" << endl;
