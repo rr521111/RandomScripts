@@ -47,7 +47,7 @@ TH1D* HistFromMatrix(vector<vector<Double_t>> data, TString title);
 void ReadingFilesCompareRespins() {
 
     vector<vector<TString>> type_table;
-    remove("./ComparisonOutputs/outputnew.txt");
+    remove("./ComparisonOutputs/outputca40Told.txt");
 
     ifstream infile;
     infile.open("./another_runlist/pcrex_run_data.list");
@@ -98,7 +98,7 @@ void ReadingFilesCompareRespins() {
         Int_t run = stoi(types_line[40].Data());
 
         //first filter to decide which runs to keep. usually production and good are safe bets.
-        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good")){// && target.Contains("48") && (wien.Contains("RIGHT") || wien.Contains("LEFT"))){
+        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good") && target.Contains("40") && !(wien.Contains("RIGHT") || wien.Contains("LEFT"))){
             Vals = OpenRun(rootfiles, run, slug, ihwp, wien, arm, textmatrix);
             //Vals2 = OpenRun(rootfiles2, run, ihwp, wien, arm);
             if (Vals[0][0] == -1) {
@@ -271,7 +271,7 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, Int_t slugnum,
         bpm4aYhtemp = (TH1F*)gROOT->FindObject(Form("bpm4aYhtemp%d", j));
         
         ofstream outfile;
-        outfile.open("./ComparisonOutputs/outputnew.txt",  std::ofstream::out | std::ofstream::app);
+        outfile.open("./ComparisonOutputs/outputca40Told.txt",  std::ofstream::out | std::ofstream::app);
         outfile << runnum << ", " << j << ", " << slugnum << ", " << count->GetValue(0) << ", " << ihwp * wien * panvalues->GetValue(0)*1000000000 << ", " << panerrors->GetValue(0)*1000000000 << ", " << bpm4eXhtemp->GetMean() << ", " << bpm4eXhtemp->GetMeanError() << ", " << bpm4eYhtemp->GetMean() << ", " << bpm4eYhtemp->GetMeanError() << ", " << bpm4aXhtemp->GetMean() << ", " << bpm4aXhtemp->GetMeanError() << ", " << bpm4aYhtemp->GetMean() << ", " << bpm4aYhtemp->GetMeanError() << endl;
         outfile.close();
 
