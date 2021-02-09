@@ -6,10 +6,10 @@ TString rootfiles2 = "/volatile/halla/parity/crex-respin1/japanOutput";
 
 //goal settings
 TString Tree = "burst_mulc_lrb_alldet";
-TString Branch = "cor_asym_us_avg";
+TString Branch = "cor_asym_us_dd";
 TString ValueLeaf = "hw_sum";
 TString ErrorLeaf = "hw_sum_err";
-TString outfilePath = "./ComparisonOutputs/outputca48old.txt";
+TString outfilePath = "./ComparisonOutputs/outputC1Told.txt";
 
 /*//postpan identical
 TString Tree = "burst_mulc_lrb_burst";
@@ -45,7 +45,7 @@ TGraphErrors* PlotFromMatrix(vector<vector<Double_t>> data, TString title);
 //takes the matrix format mentioned above and plots the second column(means)
 TH1D* HistFromMatrix(vector<vector<Double_t>> data, TString title);
 
-void ReadingFilesCompareRespins() {
+void ReadingFilesCompareTransverseRespins() {
 
     vector<vector<TString>> type_table;
     remove(outfilePath.Data());
@@ -99,7 +99,7 @@ void ReadingFilesCompareRespins() {
         Int_t run = stoi(types_line[40].Data());
 
         //first filter to decide which runs to keep. usually production and good are safe bets.
-        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good") && target.Contains("48") && (wien.Contains("RIGHT") || wien.Contains("LEFT"))){
+        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good") && target.Contains("1%") && !(wien.Contains("RIGHT") || wien.Contains("LEFT"))){
             Vals = OpenRun(rootfiles, run, slug, ihwp, wien, arm, textmatrix);
             //Vals2 = OpenRun(rootfiles2, run, ihwp, wien, arm);
             if (Vals[0][0] == -1) {
