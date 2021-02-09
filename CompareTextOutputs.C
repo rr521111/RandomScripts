@@ -42,7 +42,7 @@ void CompareTextOutputs(){
 
     //Reading in old data
     ifstream infile;
-    infile.open("./ComparisonOutputs/outputold.txt");
+    infile.open("./ComparisonOutputs/outputca48Told.txt");
     while (!infile.eof()) {
         getline(infile, ins, '\n');
         stringstream line(ins);
@@ -85,7 +85,7 @@ void CompareTextOutputs(){
 
     //Reading in new data
     ifstream infile2;
-    infile2.open("./ComparisonOutputs/outputnew.txt");
+    infile2.open("./ComparisonOutputs/outputca48Tnew.txt");
     while (!infile2.eof()) {
         getline(infile2, ins, '\n');
         stringstream line(ins);
@@ -198,7 +198,9 @@ void CompareTextOutputs(){
 
         ministep+=1;
         
-        if(nextmini1 == maxcombo){
+        cout << allruns[allruns.size()-1][0] << " " << allruns[allruns.size()-1][1] << endl;
+        cout << nextmini1 << " " << maxcombo << endl;
+        if(nextmini1 == maxcombo || nextmini2 == maxcombo){
             break;
         }
     }
@@ -380,7 +382,7 @@ void CompareTextOutputs(){
             continue;
         }
 
-        if(sluglist[i] <= 500){
+        //if(sluglist[i] <= 500){
             slugcomparison.push_back({static_cast<Double_t>(sluglist[i]), static_cast<Double_t>(numcountsold-numcountsnew), 0, 0});
             usedslugcomparison.push_back({static_cast<Double_t>(sluglist[i]), static_cast<Double_t>(usedcountsold-usedcountsnew), 0, 0});
             if(numminisold != 0 && usedcountsold != 0){
@@ -389,7 +391,7 @@ void CompareTextOutputs(){
             if(numminisnew != 0 && usedcountsnew != 0){
                 slugasymnew.push_back({static_cast<Double_t>(sluglist[i]), avgasymnewnum/avgasymnewdenom, 0, sqrt(1/avgasymnewdenom)});
             }
-        }else{
+        /*}else{
             Double_t test = sluglist[i]%4000;
             slugcomparison.push_back({static_cast<Double_t>(sluglist[i])/15 + test, static_cast<Double_t>(numcountsold-numcountsnew), 0, 0});
             usedslugcomparison.push_back({static_cast<Double_t>(sluglist[i])/15 + test, static_cast<Double_t>(usedcountsold-usedcountsnew), 0, 0});
@@ -399,7 +401,7 @@ void CompareTextOutputs(){
             if(numminisnew != 0 && usedcountsnew != 0){
                 slugasymnew.push_back({static_cast<Double_t>(sluglist[i])/15 + test, avgasymnewnum/avgasymnewdenom, 0, sqrt(1/avgasymnewdenom)});
             }
-        }
+        }*/
     }
 
     cout << "Total count difference: " << totalcounts1 << " " << totalcounts2 <<  " " << totalcounts1-totalcounts2 << " " << totalcounts << endl;
