@@ -9,7 +9,8 @@ TString Tree = "burst_mulc_lrb_alldet";
 TString Branch = "cor_asym_us_dd";
 TString ValueLeaf = "hw_sum";
 TString ErrorLeaf = "hw_sum_err";
-TString outfilePath = "./ComparisonOutputs/outputC1Told.txt";
+TString outfilePath = "./ComparisonOutputs/outputca40Tnew.txt";
+TString TargetString = "40";
 
 /*//postpan identical
 TString Tree = "burst_mulc_lrb_burst";
@@ -99,7 +100,7 @@ void ReadingFilesCompareTransverseRespins() {
         Int_t run = stoi(types_line[40].Data());
 
         //first filter to decide which runs to keep. usually production and good are safe bets.
-        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good") && target.Contains("1%") && !(wien.Contains("RIGHT") || wien.Contains("LEFT"))){
+        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good") && target.Contains(TargetString.Data()) && !(wien.Contains("RIGHT") || wien.Contains("LEFT"))){
             Vals = OpenRun(rootfiles, run, slug, ihwp, wien, arm, textmatrix);
             //Vals2 = OpenRun(rootfiles2, run, ihwp, wien, arm);
             if (Vals[0][0] == -1) {

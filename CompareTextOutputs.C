@@ -2,6 +2,10 @@ TGraphErrors* PlotFromMatrix(vector<vector<Double_t>> data, TString title);
 
 void CompareTextOutputs(){
 
+    TString FileStub = "ca48";
+    TString TargetString = "Ca48";
+    TString TreeVariable = "cor_asym_us_avg";
+
     vector<Int_t> runs1;
     vector<Int_t> miniruns1;
     vector<Int_t> slugs1;
@@ -42,7 +46,7 @@ void CompareTextOutputs(){
 
     //Reading in old data
     ifstream infile;
-    infile.open("./ComparisonOutputs/outputca48Told.txt");
+    infile.open(Form("./ComparisonOutputs/output%sold.txt", FileStub.Data()));
     while (!infile.eof()) {
         getline(infile, ins, '\n');
         stringstream line(ins);
@@ -85,7 +89,7 @@ void CompareTextOutputs(){
 
     //Reading in new data
     ifstream infile2;
-    infile2.open("./ComparisonOutputs/outputca48Tnew.txt");
+    infile2.open(Form("./ComparisonOutputs/output%snew.txt", FileStub.Data()));
     while (!infile2.eof()) {
         getline(infile2, ins, '\n');
         stringstream line(ins);
@@ -134,9 +138,9 @@ void CompareTextOutputs(){
     vector<Double_t> data1;
     vector<Double_t> data2;
     vector<Double_t> runmini;
-    Int_t ministep = 5400;
+    Int_t Step = 0;
     cout << maxcombo << endl;
-    while(ministep < maxcombo+100){
+    while(Step <= 100000){
         nextmini1 = 0;
         nextmini2 = 0;
         data1 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -176,6 +180,7 @@ void CompareTextOutputs(){
             allruns.push_back({runmini[0], runmini[1], runmini[2], data1[0], data2[0], data1[1], data2[1], data1[2], data2[2], data1[3], data2[3], data1[4], data2[4], data1[5], data2[5], data1[6], data2[6], data1[7], data2[7], data1[8], data2[8], data1[9], data2[9], data1[10], data2[10]});
             
             lastmini=nextmini1;
+
         }else{
             for(Int_t i = 0; i < runs1.size(); i++){
                 if(nextmini2==runs1[i]*100 + miniruns1[i]){
@@ -191,18 +196,75 @@ void CompareTextOutputs(){
                     break;
                 }
             }
+
             allruns.push_back({runmini[0], runmini[1], runmini[2], data1[0], data2[0], data1[1], data2[1], data1[2], data2[2], data1[3], data2[3], data1[4], data2[4], data1[5], data2[5], data1[6], data2[6], data1[7], data2[7], data1[8], data2[8], data1[9], data2[9], data1[10], data2[10]});
 
             lastmini=nextmini2;
         }
 
-        ministep+=1;
-        
-        cout << allruns[allruns.size()-1][0] << " " << allruns[allruns.size()-1][1] << endl;
-        cout << nextmini1 << " " << maxcombo << endl;
-        if(nextmini1 == maxcombo || nextmini2 == maxcombo){
-            break;
+        //really complicated way to avoid missing or double counting the last minirun. big headache.
+        if(Step > 0){
+            if(allruns[Step-1][0]*100 + allruns[Step-1][1] == runmini[0]*100 + runmini[1]){
+                cout << allruns[Step-1][0] << " " << allruns[Step-1][1] << " " << allruns[Step-1][2] << " " << allruns[Step-1][3] << " " << allruns[Step-1][4] << endl;
+                cout << allruns[Step][0] << " " << allruns[Step][1] << " " << allruns[Step][2] << " " << allruns[Step][3] << " " << allruns[Step][4] << endl << endl;
+                data1 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                data2 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+                if(nextmini1>nextmini2){
+                    nextmini2=nextmini1;
+                }else{
+                    nextmini1=nextmini2;
+                }
+
+                for(Int_t i = 0; i < runs1.size(); i++){
+                    if(nextmini1==runs1[i]*100 + miniruns1[i]){
+                        data1 = {static_cast<Double_t>(counts1[i]), asymmetries1[i], errors1[i], bpm4ex1[i], bpm4exerrors1[i], bpm4ey1[i], bpm4eyerrors1[i], bpm4ax1[i], bpm4axerrors1[i], bpm4ay1[i], bpm4ayerrors1[i]};
+                        runmini = {static_cast<Double_t>(runs1[i]), static_cast<Double_t>(miniruns1[i]), static_cast<Double_t>(slugs1[i])};
+                        break;
+                    }
+                }
+                for(Int_t i = 0; i < runs2.size(); i++){
+                    if(nextmini1==runs2[i]*100 + miniruns2[i]){
+                        data2 = {static_cast<Double_t>(counts2[i]), asymmetries2[i], errors2[i], bpm4ex2[i], bpm4exerrors2[i], bpm4ey2[i], bpm4eyerrors2[i], bpm4ax2[i], bpm4axerrors2[i], bpm4ay2[i], bpm4ayerrors2[i]};
+                        runmini = {static_cast<Double_t>(runs2[i]), static_cast<Double_t>(miniruns2[i]), static_cast<Double_t>(slugs2[i])};
+                        break;
+                    }
+                }
+            
+                allruns[Step][0] = runmini[0];
+                allruns[Step][1] = runmini[1];
+                allruns[Step][2] = runmini[2];
+                allruns[Step][3] = data1[0];
+                allruns[Step][4] = data2[0];
+                allruns[Step][5] = data1[1];
+                allruns[Step][6] = data2[1];
+                allruns[Step][7] = data1[2];
+                allruns[Step][8] = data2[2];
+                allruns[Step][9] = data1[3];
+                allruns[Step][10] = data2[3];
+                allruns[Step][11] = data1[4];
+                allruns[Step][12] = data2[4];
+                allruns[Step][13] = data1[5];
+                allruns[Step][14] = data2[5];
+                allruns[Step][15] = data1[6];
+                allruns[Step][16] = data2[6];
+                allruns[Step][17] = data1[7];
+                allruns[Step][18] = data2[7];
+                allruns[Step][19] = data1[8];
+                allruns[Step][20] = data2[8];
+                allruns[Step][21] = data1[9];
+                allruns[Step][22] = data2[9];
+                allruns[Step][23] = data1[10];
+                allruns[Step][24] = data2[10];
+
+                cout << allruns[Step-1][0] << " " << allruns[Step-1][1] << " " << allruns[Step-1][2] << " " << allruns[Step-1][3] << " " << allruns[Step-1][4] << endl;
+                cout << allruns[Step][0] << " " << allruns[Step][1] << " " << allruns[Step][2] << " " << allruns[Step][3] << " " << allruns[Step][4] << endl << endl;
+
+                break;
+            }
         }
+
+        Step += 1;
     }
     
     Int_t totalcounts = 0;
@@ -446,32 +508,32 @@ void CompareTextOutputs(){
     TCanvas *c2 = new TCanvas();
     c2->Divide(2,3);
     c2->cd(1);
-    TGraphErrors* asymoldplot = PlotFromMatrix(asymold, "Old Asymmetries Per Mini");
+    TGraphErrors* asymoldplot = PlotFromMatrix(asymold, Form("Old %s %s Per Mini", TargetString.Data(), TreeVariable.Data()));
     asymoldplot->Draw("AP");
     asymoldplot->Fit("pol0");
     gStyle->SetOptFit(1);
     c2->cd(2);
-    TGraphErrors* asymnewplot = PlotFromMatrix(asymnew, "New Asymmetries Per Mini");
+    TGraphErrors* asymnewplot = PlotFromMatrix(asymnew, Form("New %s %s Per Mini", TargetString.Data(), TreeVariable.Data()));
     asymnewplot->Draw("AP");
     asymnewplot->Fit("pol0");
     gStyle->SetOptFit(1);
     c2->cd(3);
-    TGraphErrors* runasymoldplot = PlotFromMatrix(runasymold, "Old Asymmetries Per Run");
+    TGraphErrors* runasymoldplot = PlotFromMatrix(runasymold, Form("Old %s %s Per Run", TargetString.Data(), TreeVariable.Data()));
     runasymoldplot->Draw("AP");
     runasymoldplot->Fit("pol0");
     gStyle->SetOptFit(1);
     c2->cd(4);
-    TGraphErrors* runasymnewplot = PlotFromMatrix(runasymnew, "New Asymmetries Per Run");
+    TGraphErrors* runasymnewplot = PlotFromMatrix(runasymnew, Form("New %s %s Per Run", TargetString.Data(), TreeVariable.Data()));
     runasymnewplot->Draw("AP");
     runasymnewplot->Fit("pol0");
     gStyle->SetOptFit(1); 
     c2->cd(5);
-    TGraphErrors* slugasymoldplot = PlotFromMatrix(slugasymold, "Old Asymmetries Per Slug");
+    TGraphErrors* slugasymoldplot = PlotFromMatrix(slugasymold, Form("Old %s %s Per Slug", TargetString.Data(), TreeVariable.Data()));
     slugasymoldplot->Draw("AP");
     slugasymoldplot->Fit("pol0");
     gStyle->SetOptFit(1);
     c2->cd(6);
-    TGraphErrors* slugasymnewplot = PlotFromMatrix(slugasymnew, "New Asymmetries Per Slug");
+    TGraphErrors* slugasymnewplot = PlotFromMatrix(slugasymnew, Form("New %s %s Per Slug", TargetString.Data(), TreeVariable.Data()));
     slugasymnewplot->Draw("AP");
     slugasymnewplot->Fit("pol0");
     gStyle->SetOptFit(1);
