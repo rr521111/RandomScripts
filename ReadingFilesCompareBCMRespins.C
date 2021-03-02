@@ -9,7 +9,7 @@ TString Tree = "burst_mulc_lrb_alldet";
 TString Branch = "cor_asym_us_dd";
 TString ValueLeaf = "hw_sum";
 TString ErrorLeaf = "hw_sum_err";
-TString outfilePath = "./ComparisonOutputs/outputbcmnew.txt";
+TString outfilePath = "./ComparisonOutputs/outputbcmold.txt";
 TString TargetString = "48";
 
 /*//postpan identical
