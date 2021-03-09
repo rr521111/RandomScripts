@@ -331,6 +331,8 @@ void CompareTextOutputsBCM(){
     vector<vector<Double_t>> minicomparison;
     vector<vector<Double_t>> runasymold;
     vector<vector<Double_t>> runasymnew;
+    vector<vector<Double_t>> runaqold;
+    vector<vector<Double_t>> runaqnew;
     vector<vector<Double_t>> brokenminisold;
     vector<vector<Double_t>> brokenminisnew;
     Double_t numminisold = 0;
@@ -341,6 +343,10 @@ void CompareTextOutputsBCM(){
     Double_t avgasymolddenom = 0;
     Double_t avgasymnewnum = 0;
     Double_t avgasymnewdenom = 0;
+    Double_t avgaqoldnum = 0;
+    Double_t avgaqolddenom = 0;
+    Double_t avgaqnewnum = 0;
+    Double_t avgaqnewdenom = 0;
     cout << endl; 
     cout << "Runs with changes >= 10000:" << endl;
     for(Int_t i = 4000; i < 10000; i++){
@@ -352,6 +358,10 @@ void CompareTextOutputsBCM(){
         avgasymolddenom = 0;
         avgasymnewnum = 0;
         avgasymnewdenom = 0;
+        avgaqoldnum = 0;
+        avgaqolddenom = 0;
+        avgaqnewnum = 0;
+        avgaqnewdenom = 0;
         numminisold = 0;
         numminisnew = 0;
         for(Int_t j = 0; j < allruns.size(); j++){
@@ -363,6 +373,8 @@ void CompareTextOutputsBCM(){
                     if(allruns[j][5] != 0){
                         avgasymoldnum += allruns[j][5]/(allruns[j][7]*allruns[j][7]);
                         avgasymolddenom += 1/(allruns[j][7]*allruns[j][7]);
+                        avgaqoldnum += allruns[j][21]/(allruns[j][23]*allruns[j][23]);
+                        avgaqolddenom += 1/(allruns[j][23]*allruns[j][23]);
                         usedcountsold += allruns[j][3];
                     }else{
                         brokenminisold.push_back(allruns[j]);
@@ -373,6 +385,8 @@ void CompareTextOutputsBCM(){
                     if(allruns[j][6] != 0){
                         avgasymnewnum += allruns[j][6]/(allruns[j][8]*allruns[j][8]);
                         avgasymnewdenom += 1/(allruns[j][8]*allruns[j][8]);
+                        avgaqnewnum += allruns[j][22]/(allruns[j][24]*allruns[j][24]);
+                        avgaqnewdenom += 1/(allruns[j][24]*allruns[j][24]);
                         usedcountsnew += allruns[j][4];
                     }else{
                         brokenminisnew.push_back(allruns[j]);
@@ -394,9 +408,11 @@ void CompareTextOutputsBCM(){
         usedruncomparison.push_back({static_cast<Double_t>(i), static_cast<Double_t>(usedcountsold-usedcountsnew), 0, 0});
         if(numminisold != 0 && usedcountsold != 0){
             runasymold.push_back({static_cast<Double_t>(i), avgasymoldnum/avgasymolddenom, 0, sqrt(1/avgasymolddenom)});
+            runaqold.push_back({static_cast<Double_t>(i), avgaqoldnum/avgaqolddenom, 0, sqrt(1/avgaqolddenom)});
         }
         if(numminisnew != 0 && usedcountsnew != 0){
             runasymnew.push_back({static_cast<Double_t>(i), avgasymnewnum/avgasymnewdenom, 0, sqrt(1/avgasymnewdenom)});
+            runaqnew.push_back({static_cast<Double_t>(i), avgaqnewnum/avgaqnewdenom, 0, sqrt(1/avgaqnewdenom)});
         }
         minicomparison.push_back({static_cast<Double_t>(i), numminisold-numminisnew, 0, 0});
     }
@@ -576,15 +592,28 @@ void CompareTextOutputsBCM(){
     bpm4axnewplot->Draw("AP");
     bpm4axnewplot->Fit("pol0");
     gStyle->SetOptFit(1);
-    c4->cd(7);
-    TGraphErrors* bpm4ayoldplot = PlotFromMatrix(bpm4ayold, "Old bpm4aY yield Per Mini");
+
+    TCanvas *c5 = new TCanvas();
+    c5->Divide(2,2);
+    c5->cd(1);
+    TGraphErrors* bpm4ayoldplot = PlotFromMatrix(bpm4ayold, "Old Aq Per Mini");
     bpm4ayoldplot->Draw("AP");
     bpm4ayoldplot->Fit("pol0");
     gStyle->SetOptFit(1);
-    c4->cd(8);
-    TGraphErrors* bpm4aynewplot = PlotFromMatrix(bpm4aynew, "New bpm4aY yield Per Mini");
+    c5->cd(2);
+    TGraphErrors* bpm4aynewplot = PlotFromMatrix(bpm4aynew, "New Aq Per Mini");
     bpm4aynewplot->Draw("AP");
     bpm4aynewplot->Fit("pol0");
+    gStyle->SetOptFit(1);
+    c5->cd(3);
+    TGraphErrors* runaqoldplot = PlotFromMatrix(runaqold, "Old Aq Per Run");
+    runaqoldplot->Draw("AP");
+    runaqoldplot->Fit("pol0");
+    gStyle->SetOptFit(1);
+    c5->cd(4);
+    TGraphErrors* runaqnewplot = PlotFromMatrix(runaqnew, "New Aq Per Run");
+    runaqnewplot->Draw("AP");
+    runaqnewplot->Fit("pol0");
     gStyle->SetOptFit(1);
 
     cout << endl;
