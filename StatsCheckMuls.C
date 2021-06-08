@@ -11,6 +11,9 @@ TString ValueLeaf = "hw_sum";
 TString ErrorLeaf = "hw_sum_err";
 TString outfilePath = "./ComparisonOutputs/outputca48old.txt";
 TString Device = "usr";
+Bool_t PlotErr = false;
+TString RMS = "";
+TString outputdir = "./ComparisonOutputs/Plots/temp/";
 
 /*//postpan identical
 TString Tree = "burst_mulc_lrb_burst";
@@ -48,114 +51,136 @@ TH1D* HistFromMatrix(vector<vector<Double_t>> data, TString title);
 
 void StatsCheckMuls() {
 
+    gSystem->Exec(Form("rm -f %s*", outputdir.Data()));
+
+    if(PlotErr){
+        RMS = "_RMS";
+    }
     vector<vector<TString>> type_table;
     remove(outfilePath.Data());
 
-    vector<Int_t> SizeList = {2, 4, 8, 16};
+    vector<Int_t> SizeList;// = {2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64};
+    for(int evens = 2; evens <= 64; evens++){
+        if(evens%2 == 0){
+            SizeList.push_back(evens);
+        }
+    }
     vector<TGraphErrors*> PlotList;
     vector<TH1D*> GausList;
     TCanvas* c1 = new TCanvas();
-    c1->Divide(2,SizeList.size());
+    c1->Divide(1,2);
+    //c1->Divide(2,SizeList.size());
+    TF1* fit = new TF1("fit", "gaus");
+    TH2D* fitparplot = new TH2D(Form("Usr Asymmetry%s Fit Mean Vs Window Size", RMS.Data()), Form("Usr Asymmetry%s Fit Mean Vs Window Size", RMS.Data()), 100, 0, -70, 100, -1e-6, -1e-5);
+    TH2D* fiterrplot = new TH2D(Form("Usr Asymmetry%s Fit Error Vs Window Size", RMS.Data()), Form("Usr Asymmetry%s Fit Error Vs Window Size", RMS.Data()), 100, 0, -70, 100, 0, -1e-4);
     for(int isize; isize < SizeList.size(); isize++){
  
-    ifstream infile;
-    infile.open("./another_runlist/pcrex_run_data.list");
+        ifstream infile;
+        infile.open("./another_runlist/pcrex_run_data.list");
 
-    string ins;
-    vector<Int_t> Runs;
-    vector<Double_t> Miniruns;
-    vector<Int_t> Slugs;
-    vector<TString> Arms;
-    vector<TString> Targets;
-    vector<vector<Double_t>> Vals_table;
-    vector<vector<Double_t>> Vals;
-    vector<vector<Double_t>> Vals2;
-    vector<Double_t> RunMeans;
-    vector<Double_t> RunErrors;
-    vector<vector<Double_t>> textmatrix;
+        string ins;
+        vector<Int_t> Runs;
+        vector<Double_t> Miniruns;
+        vector<Int_t> Slugs;
+        vector<TString> Arms;
+        vector<TString> Targets;
+        vector<vector<Double_t>> Vals_table;
+        vector<vector<Double_t>> Vals;
+        vector<vector<Double_t>> Vals2;
+        vector<Double_t> RunMeans;
+        vector<Double_t> RunErrors;
+        vector<vector<Double_t>> textmatrix;
 
-    Int_t total = 0;
-    Int_t i = 0;
-    Int_t First = 5400; // 3305
-    //Int_t Last = 5420;
-    Int_t Last =5450;//8559; // 4980
-    while (!infile.eof()) {
-        //splits the file at line breaks
-        getline(infile, ins, '\n');
-        stringstream line(ins);
-        types_line.clear();
-        //splits the line at commas
-        while (line.good()) {
-            string substr;
-            getline(line, substr, ',');
-            types_line.push_back(substr);
+        Int_t total = 0;
+        Int_t i = 0;
+        Int_t First = 5449; // 3305
+        //Int_t Last = 5420;
+        Int_t Last =5455;//8559; // 4980
+        while (!infile.eof()) {
+            //splits the file at line breaks
+            getline(infile, ins, '\n');
+            stringstream line(ins);
+            types_line.clear();
+            //splits the line at commas
+            while (line.good()) {
+                string substr;
+                getline(line, substr, ',');
+                types_line.push_back(substr);
 
-        }
+            }
 
-        //avoids slug and run numbers that somehow aren't integer. I dont think any more of these exist after fixing the runlist.
-        if (types_line[31] == " " || types_line[31] == "BEGONE_COMMAS" || types_line[40] == " " || types_line[40] == "BEGONE_COMMAS") {
-            continue;
-        }
-
-        TString arm = types_line[0];
-        TString wien = types_line[11];
-        TString ihwp = types_line[16];
-        TString goodbad = types_line[24];
-        TString production = types_line[29];
-        Int_t slug = stoi(types_line[31].Data());
-        TString target = types_line[35];
-        Int_t run = stoi(types_line[40].Data());
-
-        //first filter to decide which runs to keep. usually production and good are safe bets.
-        if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good") && target.Contains("48") && (wien.Contains("RIGHT") || wien.Contains("LEFT"))){
-            Vals = OpenRun(rootfiles, run, slug, ihwp, wien, arm, textmatrix, SizeList[isize]);
-            //Vals2 = OpenRun(rootfiles2, run, ihwp, wien, arm);
-            if (Vals[0][0] == -1) {
+            //avoids slug and run numbers that somehow aren't integer. I dont think any more of these exist after fixing the runlist.
+            if (types_line[31] == " " || types_line[31] == "BEGONE_COMMAS" || types_line[40] == " " || types_line[40] == "BEGONE_COMMAS") {
                 continue;
             }
 
-            //Vals[0][1] = Vals[0][1] - Vals2[0][1];
-            total += Vals[0][1];
-            //cout << run << " " << Vals[0][1] << endl;
+            TString arm = types_line[0];
+            TString wien = types_line[11];
+            TString ihwp = types_line[16];
+            TString goodbad = types_line[24];
+            TString production = types_line[29];
+            Int_t slug = stoi(types_line[31].Data());
+            TString target = types_line[35];
+            Int_t run = stoi(types_line[40].Data());
 
-            type_table.push_back(types_line);
-            int minirun = 0;
-            for(minirun = 0; minirun<Vals.size(); minirun++){
-                Vals_table.push_back(Vals[minirun]);
-                Miniruns.push_back(Vals[minirun][0]);
-                RunMeans.push_back(Vals[minirun][1]);
-                RunErrors.push_back(Vals[minirun][3]);
+            //first filter to decide which runs to keep. usually production and good are safe bets.
+            if (run >= First && run <= Last && run != 3140 && production.Contains("Production") && goodbad.Contains("Good") && target.Contains("48") && (wien.Contains("RIGHT") || wien.Contains("LEFT"))){
+                Vals = OpenRun(rootfiles, run, slug, ihwp, wien, arm, textmatrix, SizeList[isize]);
+                //Vals2 = OpenRun(rootfiles2, run, ihwp, wien, arm);
+                if (Vals[0][0] == -1) {
+                    continue;
+                }
+
+                //Vals[0][1] = Vals[0][1] - Vals2[0][1];
+                total += Vals[0][1];
+                //cout << run << " " << Vals[0][1] << endl;
+
+                type_table.push_back(types_line);
+                int minirun = 0;
+                for(minirun = 0; minirun<Vals.size(); minirun++){
+                    Vals_table.push_back(Vals[minirun]);
+                    Miniruns.push_back(Vals[minirun][0]);
+                    RunMeans.push_back(Vals[minirun][1]);
+                    RunErrors.push_back(Vals[minirun][3]);
+                    
+                    Runs.push_back(run);
+                    Slugs.push_back(slug);
+                    Arms.push_back(arm);
+                    Targets.push_back(target);
+                }
+
+                //wiggly status message
+                for (int j = 0; j < round(70 * (sin((i)*M_PI / 20)) + 70); j++) {
+                    cout << " ";
+                }
+                cout << "Found run " << run << " with " << minirun << " miniruns..." << endl;
+
+                i++;
                 
-                Runs.push_back(run);
-                Slugs.push_back(slug);
-                Arms.push_back(arm);
-                Targets.push_back(target);
             }
-
-            //wiggly status message
-            for (int j = 0; j < round(70 * (sin((i)*M_PI / 20)) + 70); j++) {
-                cout << " ";
-            }
-            cout << "Found run " << run << " with " << minirun << " miniruns..." << endl;
-
-            i++;
-            
         }
-    }
 
-    infile.close();
+        infile.close();
 
-    PlotList.push_back(PlotFromMatrix(Vals_table, Form("PREX %s, %d Window", Device.Data(), SizeList[isize])));
-    PlotList[isize]->Fit("pol0", "q");
+        /*PlotList.push_back(PlotFromMatrix(Vals_table, Form("PREX Asymmetry %s%s, %d Window, Vs Run", Device.Data(), RMS.Data(), SizeList[isize])));
+        //PlotList[isize]->Fit("pol0", "q");
+        PlotList[isize]->Fit("fit", "q");
 
-    c1->cd(1+(isize*2));
-    gStyle->SetOptFit(1);
-    PlotList[isize]->Draw("AP");
-    c1->cd(2+(isize*2));
-    GausList.push_back(HistFromMatrix(Vals_table, Form("PREX %s, %d Window", Device.Data(), SizeList[isize])));
-    GausList[isize]->Fit("gaus", "q");
-    gStyle->SetOptFit(1);
-    GausList[isize]->Draw();
+        c1->cd(1);
+        //c1->cd(1+(isize*2));
+        gStyle->SetOptFit(1);
+        PlotList[isize]->Draw("AP");
+        c1->cd(2);*/
+        //c1->cd(2+(isize*2));
+        GausList.push_back(HistFromMatrix(Vals_table, Form("PREX Asymmetry %s%s, %d Window", Device.Data(), RMS.Data(), SizeList[isize])));
+        //GausList[isize]->Fit("gaus", "q");
+        GausList[isize]->Fit("fit", "q");
+        gStyle->SetOptFit(1);
+        GausList[isize]->Draw();
+        c1->SaveAs(Form("%sMulsWindow%02d.pdf", outputdir.Data(), isize));
+
+        fitparplot->Fill(SizeList[isize], fit->GetParameter(1));
+        fiterrplot->Fill(SizeList[isize], fit->GetParameter(2));
 
     }
 
@@ -184,6 +209,21 @@ void StatsCheckMuls() {
     gStyle->SetOptFit(1);
     SlugHist->Draw();
     */
+    TCanvas* c2 = new TCanvas();
+    fitparplot->SetMarkerStyle(7);
+    fitparplot->SetAxisRange(0, 66, "X");
+    fitparplot->SetAxisRange(fitparplot->GetMinimum()-((fitparplot->GetMean()-fitparplot->GetMinimum())*0.1), fitparplot->GetMaximum()+((fitparplot->GetMaximum()-fitparplot->GetMean())*0.1), "Y");
+    fitparplot->Draw();
+    c2->SaveAs(Form("%sp0s.pdf", outputdir.Data()));
+    TCanvas* c3 = new TCanvas();
+    fiterrplot->SetMarkerStyle(7);
+    fiterrplot->SetAxisRange(0, 66, "X");
+    fiterrplot->SetAxisRange(fiterrplot->GetMinimum()-((fiterrplot->GetMean()-fiterrplot->GetMinimum())*0.1), fiterrplot->GetMaximum()+((fiterrplot->GetMaximum()-fiterrplot->GetMean())*0.1), "Y");
+    fiterrplot->Draw();
+    c3->SaveAs(Form("%sp0errors.pdf", outputdir.Data()));
+
+    gSystem->Exec(Form("rm ./ComparisonOutputs/Plots/Mul%sComparison.pdf", RMS.Data()));
+    gSystem->Exec(Form("pdfunite `ls %s*.pdf` ./ComparisonOutputs/Plots/Mul%sComparison.pdf", outputdir.Data(), RMS.Data()));
     return;
 }
 
@@ -287,12 +327,14 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, Int_t slugnum,
 
     //TH1F* main = new TH1F;
     //TH1F* minirunav = new TH1F;
-    Double_t minisumnum = 0;
-    Double_t minisumden = 0;
-    Double_t minierrnum = 0;
+    Double_t miniav= 0;
+    Double_t minierr = 0;
+    Double_t minierrvec[WindowSize];
     Int_t burstcounter = 0;
     for(int j = 0; j < entries; j++){
         Int_t eventcount = 0;
+        miniav = 0;
+        minierr = 0;
 
         for(int k = lastcount; k < b4->GetEntries(); k++){
             b4->GetEntry(k);
@@ -300,7 +342,9 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, Int_t slugnum,
             b5y->GetEntry(k);
             b6->GetEntry(k);
             if(errorflag->GetValue(0) == 0){
-                main->Fill(asym_usr->GetValue(0));
+                miniav += asym_usr->GetValue(0);
+                minierrvec[eventcount] = asym_usr->GetValue(0);
+                //main->Fill(asym_usr->GetValue(0));
                 eventcount++;
                 burstcounter++;
                 if(eventcount == WindowSize){
@@ -319,18 +363,22 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, Int_t slugnum,
                 thiscount = k;
             }
         }
-        
-        minirunav->Fill(main->GetMean());
 
-        //cout << eventcount << endl;
+        miniav = miniav/WindowSize;
 
-        //if(burstcounter >= 9000){
-            vals.push_back({runnum+j/static_cast<double>(entries), main->GetMean(), 0, main->GetMeanError()});
-            minirunav->Reset();
-            burstcounter = 0;
-        //}
-        
-        main->Reset();
+        for(Int_t p = 0; p < WindowSize; p++){
+            minierr += minierrvec[p]*minierrvec[p];
+        }
+        minierr = minierr/WindowSize;
+        minierr = sqrt(minierr-miniav*miniav);
+
+        if(PlotErr){
+            vals.push_back({runnum+j/static_cast<double>(entries), minierr, 0, 0});
+        }else{
+            vals.push_back({runnum+j/static_cast<double>(entries), miniav, 0, 0});
+        }
+
+        burstcounter = 0;
 
         if(lastmini){
             j++;
