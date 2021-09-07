@@ -36,8 +36,7 @@ TH1D* HistFromMatrix(vector<vector<Double_t>> data, TString title);
 
 void AllTargsATevMon(){
 
-    //cout << "run, mini, ihwp, wien, targ, exvusl, Dexvusl, exvusr, Dexvusr, exvdd, Dexvdd, 1xvdd, D1xvdd, asym, Dasym, ex, Dex, ey, Dey, ax, Dax, ay, Day, E, DE, 1x, D1x, 12x, D12x" << endl;
-    cout << "run, mini, ihwp, wien, targ, 0vdd, D0vdd, 1vdd, D1vdd, 2vdd, D2vdd, 3vdd, D3vdd, 4vdd, D4vdd, asym, Dasym, ex, Dex, ey, Dey, ax, Dax, ay, Day, E, DE, 1x, D1x, 12x, D12x" << endl;
+    //cout << "run, mini, ihwp, wien, targ, 0vdd, D0vdd, 1vdd, D1vdd, 2vdd, D2vdd, 3vdd, D3vdd, 4vdd, D4vdd, asym, Dasym, ex, Dex, ey, Dey, ax, Dax, ay, Day, E, DE, 1x, D1x, 12x, D12x" << endl;
 
     vector<vector<TString>> allinputs = {
         /*{"Pb",     "PREX", "1"},
@@ -215,13 +214,13 @@ void oldmain(TString targ = "Pb", TString pcrex = "CREX", TString rungroup = "1"
             }
 
             //wiggly status message
-            /*for (int j = 0; j < round(70 * (sin((i)*M_PI / 20)) + 70); j++) {
+            for (int j = 0; j < round(70 * (sin((i)*M_PI / 20)) + 70); j++) {
                 cout << " ";
             }
             cout << "Found run " << run << " with " << minirun << " miniruns..." << endl;
 
             i++;
-            xpos = i;*/
+            xpos = i;
             
         }
     }
@@ -243,7 +242,7 @@ void oldmain(TString targ = "Pb", TString pcrex = "CREX", TString rungroup = "1"
         "dd"
     };
 
-    /*vector<vector<Double_t>> plotmatrix;
+    vector<vector<Double_t>> plotmatrix;
     TCanvas* c1 = new TCanvas();
     c1->Divide(2,1);
     Int_t ivar = 0;
@@ -287,7 +286,9 @@ void oldmain(TString targ = "Pb", TString pcrex = "CREX", TString rungroup = "1"
                 plotmatrix.push_back({Vals_table[miniindex][Avusl[rows1]], Vals_table[miniindex][Avusl[rows2]], Vals_table[miniindex][Avusl[rows1]+1], Vals_table[miniindex][Avusl[rows2]+1]});
             }
             TGraphErrors* RunPlot = PlotFromMatrix(plotmatrix, Form("%s, %s Target, Part %s, Miniruns %s", pcrex.Data(), Target.Data(), rungroup.Data(), VarCombo.Data()));
-            RunPlot->Fit("pol1","q");
+            TF1* f1 = new TF1("f1", "[0] + [1]*x");
+            f1->SetParameter(0, RunPlot->GetMean(2));
+            RunPlot->Fit("f1","q");
             gStyle->SetOptFit(1);
             RunPlot->Draw("AP");
             plotmatrix.clear();
@@ -306,7 +307,9 @@ void oldmain(TString targ = "Pb", TString pcrex = "CREX", TString rungroup = "1"
                 plotmatrix.push_back({Vals_table[miniindex][Avusr[rows1]], Vals_table[miniindex][Avusr[rows2]], Vals_table[miniindex][Avusr[rows1]+1], Vals_table[miniindex][Avusr[rows2]+1]});
             }
             TGraphErrors* RunPlot = PlotFromMatrix(plotmatrix, Form("%s, %s Target, Part %s, Miniruns %s", pcrex.Data(), Target.Data(), rungroup.Data(), VarCombo.Data()));
-            RunPlot->Fit("pol1","q");
+            TF1* f1 = new TF1("f1", "[0] + [1]*x");
+            f1->SetParameter(0, RunPlot->GetMean(2));
+            RunPlot->Fit("f1","q");
             gStyle->SetOptFit(1);
             RunPlot->Draw("AP");
             plotmatrix.clear();
@@ -325,7 +328,9 @@ void oldmain(TString targ = "Pb", TString pcrex = "CREX", TString rungroup = "1"
                 plotmatrix.push_back({Vals_table[miniindex][Avavg[rows1]], Vals_table[miniindex][Avavg[rows2]], Vals_table[miniindex][Avavg[rows1]+1], Vals_table[miniindex][Avavg[rows2]+1]});
             }
             TGraphErrors* RunPlot = PlotFromMatrix(plotmatrix, Form("%s, %s Target, Part %s, Miniruns %s", pcrex.Data(), Target.Data(), rungroup.Data(), VarCombo.Data()));
-            RunPlot->Fit("pol1","q");
+            TF1* f1 = new TF1("f1", "[0] + [1]*x");
+            f1->SetParameter(0, RunPlot->GetMean(2));
+            RunPlot->Fit("f1","q");
             gStyle->SetOptFit(1);
             RunPlot->Draw("AP");
             plotmatrix.clear();
@@ -344,13 +349,16 @@ void oldmain(TString targ = "Pb", TString pcrex = "CREX", TString rungroup = "1"
                 plotmatrix.push_back({Vals_table[miniindex][Avdd[rows1]], Vals_table[miniindex][Avdd[rows2]], Vals_table[miniindex][Avdd[rows1]+1], Vals_table[miniindex][Avdd[rows2]+1]});
             }
             TGraphErrors* RunPlot = PlotFromMatrix(plotmatrix, Form("%s, %s Target, Part %s, Miniruns %s", pcrex.Data(), Target.Data(), rungroup.Data(), VarCombo.Data()));
-            RunPlot->Fit("pol1","q");
+            TF1* f1 = new TF1("f1", "[0] + [1]*x");
+            f1->SetParameter(0, RunPlot->GetMean(2));
+            RunPlot->Fit("f1","q");
             gStyle->SetOptFit(1);
             RunPlot->Draw("AP");
             plotmatrix.clear();
+
         }
     }
-    c5->SaveAs(Form("./Outputs/temp/AllTargsAT%s%s%sAllddSlopes.pdf", pcrex.Data(), Target.Data(), rungroup.Data()));*/
+    c5->SaveAs(Form("./Outputs/temp/AllTargsAT%s%s%sAllddSlopes.pdf", pcrex.Data(), Target.Data(), rungroup.Data()));
 
     return;
 }
@@ -447,7 +455,7 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, Int_t slugnum,
         mul->Draw(Form("mulc.diff_evMon4>>t5%d()", j), Form("ErrorFlag==0 && BurstCounter==%d", j), "goff");
         temp[j][4] = (TH1F*)gROOT->FindObject(Form("t5%d", j));
 
-        cout << runnum << ", " << j << ", " << ihwp << ", " << wien << ", " << Target << ", ";
+        /*cout << runnum << ", " << j << ", " << ihwp << ", " << wien << ", " << Target << ", ";
 
         for(int igood = 0; igood < 5; igood++){
             cout << temp[j][igood]->GetMean() << ", " << temp[j][igood]->GetMeanError();
@@ -456,7 +464,7 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, Int_t slugnum,
             }else{
                 cout << " " << endl;
             }
-        }
+        }*/
 
         burst_lrb_std->GetEntry(j);
 
