@@ -385,7 +385,7 @@ void oldmain(TString targ = "Pb", TString pcrex = "CREX", TString rungroup = "1"
 
     if(pcrex.Contains("PREX")){
         for(int miniindex = 0; miniindex < Vals_table.size(); miniindex++){
-            cout << Vals_table[miniindex][11] << ", " << Vals_table[miniindex][12] << ", " << Vals_table[miniindex][71] << ", " << Vals_table[miniindex][72] << ", " << Vals_table[miniindex][191] << ", " << Vals_table[miniindex][192] << ", " << Vals_table[miniindex][251] << ", " << Vals_table[miniindex][252] << endl;
+            //cout << Vals_table[miniindex][11] << ", " << Vals_table[miniindex][12] << ", " << Vals_table[miniindex][71] << ", " << Vals_table[miniindex][72] << ", " << Vals_table[miniindex][191] << ", " << Vals_table[miniindex][192] << ", " << Vals_table[miniindex][251] << ", " << Vals_table[miniindex][252] << endl;
             //11, 71, 131, 191, 251 and errors
             //plotmatrix.push_back({Vals_table[miniindex][Avavg[rows1]], Vals_table[miniindex][Avavg[rows2]], Vals_table[miniindex][Avavg[rows1]+1], Vals_table[miniindex][Avavg[rows2]+1]});
         }
@@ -501,7 +501,7 @@ vector<vector<Double_t>> OpenRun(TString directory, Int_t runnum, Int_t slugnum,
                 TempRunVector.push_back(slopedA->GetValue(ii));
             }
             vals.push_back(TempRunVector);
-            cout << Vals_table[miniindex][11] << ", " << Vals_table[miniindex][12] << ", " << Vals_table[miniindex][71] << ", " << Vals_table[miniindex][72] << ", " << Vals_table[miniindex][191] << ", " << Vals_table[miniindex][192] << ", " << Vals_table[miniindex][251] << ", " << Vals_table[miniindex][252] << endl;
+            cout << runnum << ", " << j << ", " << TempRunVector[11] << ", " << TempRunVector[12] << ", " << TempRunVector[71] << ", " << TempRunVector[72] << ", " << TempRunVector[131] << ", " << TempRunVector[132] << ", " << TempRunVector[191] << ", " << TempRunVector[192] << ", " << TempRunVector[251] << ", " << TempRunVector[252] << endl;
             TempRunVector.clear();
         }
     }
